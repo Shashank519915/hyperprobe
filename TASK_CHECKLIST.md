@@ -14,7 +14,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR | Branch | Tasks | Done | Status |
 |----|--------|-------|------|--------|
 | PR-01 | `chore/repo-scaffold` | 1.1–1.4 | 4/4 | ✅ merged |
-| PR-02 | `feat/target-core-layers` | 2.1–2.3 | 2/3 | 🔄 in progress |
+| PR-02 | `feat/target-core-layers` | 2.1–2.3 | 3/3 | ✅ ready for PR |
 | PR-03 | `feat/target-http-server` | 2.4–2.6 | 0/3 | ⬜ todo |
 | PR-04 | `feat/agent-data-models` | 4.1–4.2 | 0/2 | ⬜ todo |
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 0/5 | ⬜ todo |
@@ -314,7 +314,7 @@ feat(target): add operation engines (add/sub/mul/div)
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done |
 | **Branch** | `feat/target-core-layers` |
 | **Requirements** | R2 |
 | **Files** | `target/services/math_service.py` |
@@ -331,14 +331,23 @@ feat(target): add operation engines (add/sub/mul/div)
 ```text
 MathService().compute('add', 10, 20) == 30
 MathService().compute('sub'|'mul'|'div', ...) → OK
-pytest tests/ -q → no tests ran, exit 0
+pytest tests/ -q → no tests ran, exit 0 (before 2.3)
+Pushed to origin/feat/target-core-layers
 ```
 
 **Placeholder commit:** `feat(target): add MathService routing to engines`
 
-**Actual commit hash:**
+**Actual commit hash:** `6fb0c56`
 
 **Actual commit message:**
+
+```text
+feat(target): add MathService routing to engines
+
+- Add MathService.compute(op, a, b) routing add/sub/mul/div to layer-3 engines
+- Raise ValueError for unsupported op (HTTP mapping in task 2.4)
+- Update TASK_CHECKLIST and CONTEXT: task 2.1 verified on remote, 2.2 done
+```
 
 **Notes:**
 
@@ -348,31 +357,83 @@ pytest tests/ -q → no tests ran, exit 0
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ⬜ todo |
+| **Status** | ✅ done (commit pending) |
 | **Branch** | `feat/target-core-layers` |
 | **Requirements** | R2 |
-| **Files** | `tests/test_target_math.py` |
+| **Files** | `tests/test_target_math.py`, `tests/conftest.py` |
 | **Done when** | pytest passes |
+
+**Delivered:**
+
+- `tests/test_target_math.py` — 11 tests covering all four engines and MathService routing
+- Cases: happy path per op, unknown op → `ValueError`, divide by zero → `ZeroDivisionError`
+- `tests/conftest.py` — repo root on `sys.path`; removed scaffold exit-5 hook
+
+**Verification:**
+
+```text
+pytest tests/ -q → 11 passed
+No agent imports in tests/test_target_math.py
+```
 
 **Placeholder commit:** `test(target): unit test MathService and engines`
 
-**Actual commit hash:** · **Actual commit message:** · **Verification:** · **Notes:**
+**Actual commit hash:**
+
+**Actual commit message:**
+
+**Notes:**
 
 ---
 
 **PR-02 merge checklist:**
 
-- [ ] All tasks 2.1–2.3 ✅
+- [x] All tasks 2.1–2.3 ✅
 - [ ] CI green on PR
 - [ ] PR merged to `main`
 
-**Pull request draft** *(fill after task 2.3 — then open PR on GitHub):*
+**Pull request draft** *(copy to GitHub after task 2.3 push):*
 
 | Field | Value |
 |-------|--------|
-| **When** | After task **2.3** is committed and pushed |
+| **When** | Now — after task 2.3 commit + push |
 | **Base ← Compare** | `main` ← `feat/target-core-layers` |
 | **Title** | `feat(target): core math layers (PR-02)` |
+
+**Description** (paste into GitHub PR body):
+
+```markdown
+## Summary
+Layer 2 (MathService) and layer 3 (operation engines) for the calculator target — no HTTP yet, no agent.
+
+## Tasks included
+
+### Task 2.1 — Operation engines
+- **Files:** `target/engines/addition.py`, `subtraction.py`, `multiplication.py`, `division.py`
+- **Behavior:** One engine class per operation (`AdditionEngine.add`, etc.)
+- **Verification:** Pure logic; no I/O, logging, or agent imports
+
+### Task 2.2 — MathService
+- **Files:** `target/services/math_service.py`
+- **Behavior:** `MathService.compute(op, a, b)` routes `add`/`sub`/`mul`/`div`; unknown op → `ValueError`
+- **Verification:** Smoke test; division by zero propagates
+
+### Task 2.3 — Unit tests
+- **Files:** `tests/test_target_math.py`, `tests/conftest.py`
+- **Behavior:** 11 pytest cases for engines + service routing
+- **Verification:** `pytest tests/ -q` — 11 passed
+
+## Requirements touched
+R2 (partial — service + engine layers) · R3 · R14
+
+## Test plan
+- [ ] `ci` workflow green
+- [ ] `pytest tests/ -q` — 11 passed
+- [ ] `bash scripts/check_target_purity.sh` — no agent/logging/print in target/
+
+## Merge notes
+Depends on PR-01 merged. After merge, branch `feat/target-http-server` from updated `main`.
+```
 
 ---
 

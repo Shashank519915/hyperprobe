@@ -65,6 +65,18 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 2.3 complete (local)
+
+- Added `tests/test_target_math.py` — 11 tests (engines + MathService)
+- Updated `tests/conftest.py` — repo root on sys.path; removed scaffold hook
+- PR-02 ready — open PR after commit + push
+- Next: commit 2.3, push, open PR-02
+
+### 2026-06-16 — Task 2.2 committed
+
+- Commit `6fb0c56`: MathService routing to engines
+- Pushed to `origin/feat/target-core-layers`
+
 ### 2026-06-16 — Task 2.2 complete (local)
 
 - Added `target/services/math_service.py` — `MathService.compute(op, a, b)`
