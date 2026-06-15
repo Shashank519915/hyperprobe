@@ -69,6 +69,15 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 4.2 complete (local)
+
+- Extended `agent/models.py`: TraceEvent, RawFrame, RawCapture, StackFrame, Snapshot
+- PR-04 ready — open PR after commit + push
+
+### 2026-06-16 — Task 4.1 committed
+
+- Commit `f3e0deb`: BreakpointType, CaptureMode, Breakpoint; CI green
+
 ### 2026-06-16 — Task 4.1 complete (local)
 
 - Added `agent/models.py` — `BreakpointType`, `CaptureMode`, `Breakpoint` (§5.6)

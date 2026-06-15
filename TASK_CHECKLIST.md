@@ -16,7 +16,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-01 | `chore/repo-scaffold` | 1.1–1.4 | 4/4 | ✅ merged |
 | PR-02 | `feat/target-core-layers` | 2.1–2.3 | 3/3 | ✅ merged |
 | PR-03 | `feat/target-http-server` | 2.4–2.6 | 3/3 | ✅ merged |
-| PR-04 | `feat/agent-data-models` | 4.1–4.2 | 1/2 | 🔄 in progress |
+| PR-04 | `feat/agent-data-models` | 4.1–4.2 | 2/2 | ✅ ready for PR |
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 0/5 | ⬜ todo |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 0/2 | ⬜ todo |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 0/3 | ⬜ todo |
@@ -638,7 +638,7 @@ Depends on PR-02 merged. After merge, can start PR-04 (`feat/agent-data-models`)
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done |
 | **Branch** | `feat/agent-data-models` |
 | **Requirements** | R10, R16 |
 | **Files** | `agent/models.py` |
@@ -654,15 +654,23 @@ Depends on PR-02 merged. After merge, can start PR-04 (`feat/agent-data-models`)
 **Verification:**
 
 ```text
-pytest tests/ -q → 18 passed (no agent tests yet)
-Models importable: from agent.models import Breakpoint, BreakpointType, CaptureMode
+pytest tests/ -q → 18 passed
+Pushed to origin/feat/agent-data-models; CI green
 ```
 
 **Placeholder commit:** `feat(agent): add Breakpoint and CaptureMode models`
 
-**Actual commit hash:**
+**Actual commit hash:** `f3e0deb`
 
 **Actual commit message:**
+
+```text
+feat(agent): add Breakpoint and CaptureMode models
+
+- Add BreakpointType, CaptureMode enums and Breakpoint dataclass
+- Match ARCHITECTURE_V2 section 5.6 (function/method/file_line fields)
+- Update TASK_CHECKLIST and CONTEXT: PR-03 merged, PR-04 task 4.1 done
+```
 
 **Notes:** No imports from `target/` in agent models.
 
@@ -670,27 +678,79 @@ Models importable: from agent.models import Breakpoint, BreakpointType, CaptureM
 
 ### Task 4.2 — RawCapture and Snapshot models
 
-| Status | ⬜ todo | **Files** | `agent/models.py` | **Req** | R10, R20 |
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-data-models` |
+| **Requirements** | R10, R20 |
+| **Files** | `agent/models.py` |
+| **Done when** | Matches ARCHITECTURE_V2 §5.5 / §5.7 |
+
+**Delivered:**
+
+- `TraceEvent` — `call`, `return`, `line`
+- `RawFrame` / `RawCapture` — frozen sync copies from trace callback (§5.5)
+- `StackFrame` / `Snapshot` — worker output schema with `breakpoint_id`, optional `return_value` (§5.7)
+
+**Verification:**
+
+```text
+Import smoke test for RawCapture, RawFrame, Snapshot, StackFrame
+pytest tests/ -q → 18 passed
+```
 
 **Placeholder commit:** `feat(agent): add RawCapture, Snapshot, StackFrame models`
 
-**Actual commit hash:** · **Actual commit message:** · **Verification:** · **Notes:**
+**Actual commit hash:**
+
+**Actual commit message:**
+
+**Notes:**
 
 ---
 
 **PR-04 merge checklist:**
 
-- [ ] All tasks 4.1–4.2 ✅
+- [x] All tasks 4.1–4.2 ✅
 - [ ] CI green on PR
 - [ ] PR merged to `main`
 
-**Pull request draft** *(fill after task 4.2 — then open PR on GitHub):*
+**Pull request draft** *(copy to GitHub after task 4.2 push):*
 
 | Field | Value |
 |-------|--------|
-| **When** | After task **4.2** is committed and pushed |
+| **When** | Now — after task 4.2 commit + push |
 | **Base ← Compare** | `main` ← `feat/agent-data-models` |
 | **Title** | `feat(agent): data models (PR-04)` |
+
+**Description** (paste into GitHub PR body):
+
+```markdown
+## Summary
+Agent dataclasses for breakpoints, sync capture copies, and snapshot JSON schema — no runtime hooks yet.
+
+## Tasks included
+
+### Task 4.1 — Breakpoint models
+- **Files:** `agent/models.py`
+- **Behavior:** BreakpointType, CaptureMode, Breakpoint (§5.6)
+- **Verification:** No target imports; CI green
+
+### Task 4.2 — RawCapture and Snapshot models
+- **Files:** `agent/models.py`
+- **Behavior:** TraceEvent, RawFrame, RawCapture (§5.5), StackFrame, Snapshot (§5.7)
+- **Verification:** Import smoke test; pytest 18 passed
+
+## Requirements touched
+R10 · R16 · R20 (breakpoint_id on snapshot)
+
+## Test plan
+- [ ] `ci` workflow green
+- [ ] `pytest tests/ -q` — 18 passed
+
+## Merge notes
+Depends on PR-01/PR-03 on main. Enables PR-05 (registry) and PR-06/07 (serializer, worker).
+```
 
 ---
 
