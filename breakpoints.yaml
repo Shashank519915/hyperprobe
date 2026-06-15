@@ -1,0 +1,16 @@
+breakpoints:
+  - id: seed-function-compute
+    type: function
+    value: compute
+    capture_mode: ENTRY
+
+  - id: seed-method-add
+    type: method
+    value: AdditionEngine.add
+    capture_mode: ENTRY
+
+  - id: seed-line-addition-return
+    type: file_line
+    file: target/engines/addition.py
+    line: 5
+    capture_mode: RETURN

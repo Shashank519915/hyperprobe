@@ -12,7 +12,7 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 | **GitHub** | https://github.com/Shashank519915/hyperprobe.git |
 | **Structure** | Monorepo — `target/` + `agent/` in one repo |
 | **Default branch** | `main` |
-| **Active branch** | `feat/agent-data-models` (PR-04) |
+| **Active branch** | `feat/agent-breakpoint-registry` (PR-05) |
 | **CI workflows** | `ci` (pytest + purity) · `Dependency Graph` (Dependabot — automatic) |
 
 ---
@@ -33,7 +33,9 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 ```text
 hyperprobe/
 ├── agent/
-│   └── models.py       # Breakpoint types (PR-04)
+│   ├── models.py       # Breakpoint + snapshot models (PR-04)
+│   ├── breakpoints.py  # normalize_path + matchers (PR-05)
+│   └── registry.py     # BreakpointRegistry (PR-05)
 ├── target/
 │   ├── handlers.py     # layer 1 — RouteHandler
 │   ├── server.py       # ThreadingHTTPServer :8080 (PR-03)
@@ -44,6 +46,7 @@ hyperprobe/
 ├── snapshots/
 ├── notes/              # gitignored — ARCHITECTURE_V2, IMPLEMENTATION_PLAN, DEMO_COMMANDS.md
 ├── oldnotes/           # gitignored — draft architecture history
+├── breakpoints.yaml    # seed breakpoint config (PR-05)
 ├── TASK_CHECKLIST.md   # task tracking (committed)
 ├── CODE_STYLE.md
 ├── CONTEXT.md          # this file
@@ -68,6 +71,57 @@ hyperprobe/
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 5.5 complete (local)
+
+- Added `breakpoints.yaml` + `load_breakpoints_yaml` / `breakpoint_from_dict`
+- Added PyYAML to `requirements.txt`; 38 pytest total
+- PR-05 ready — open PR after commit + push
+
+### 2026-06-16 — Task 5.4 committed
+
+- Commit `b7e13d8`: multiple BPs per target; CI green
+
+### 2026-06-16 — Task 5.4 complete (local)
+
+- Added `get_matching_breakpoint_ids` — all matching bp ids, no deduplication
+- Tests: multiple function/method/file_line BPs on same target (34 pytest total)
+- Next: commit 5.4, then task 5.5 (breakpoints.yaml loader)
+
+### 2026-06-16 — Task 5.3 committed
+
+- Commit `64844b5`: BreakpointRegistry with O(1) indexes
+
+### 2026-06-16 — Task 5.3 complete (local)
+
+- Added `agent/registry.py` — thread-safe BreakpointRegistry with O(1) indexes
+- Added `tests/test_registry.py` — 5 tests; pytest 31 passed
+- Next: commit 5.3, then task 5.4 (multiple BPs same target)
+
+### 2026-06-16 — Task 5.2 committed
+
+- Commit `1852668`: breakpoint matchers; CI green
+
+### 2026-06-16 — Task 5.2 complete (local)
+
+- Added breakpoint matchers: function, method, file_line + `matches_breakpoint` dispatcher
+- Extended `tests/test_breakpoints.py` — 8 tests total; pytest 26 passed
+- Next: commit 5.2, then task 5.3 (registry indexes)
+
+### 2026-06-16 — Task 5.1 committed
+
+- Commit `05dcf8e`: `normalize_path`; CI green on push
+
+### 2026-06-16 — Task 5.1 complete (local)
+
+- Added `agent/breakpoints.py` — `normalize_path()` via `Path.resolve()`
+- Added `tests/test_breakpoints.py` — 4 path normalization tests (22 total pytest)
+- Next: commit 5.1, then task 5.2 (matchers)
+
+### 2026-06-16 — PR-04 merged
+
+- PR #4 merged to `main` (merge `f96581f`); branch `feat/agent-breakpoint-registry`
+- Tasks 4.1–4.2: full agent model layer on main; CI green
 
 ### 2026-06-16 — Task 4.2 complete (local)
 
@@ -198,7 +252,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-03 merged to `main`. Current work: **PR-04** on `feat/agent-data-models`.
+PR-04 merged to `main`. PR-05 complete on `feat/agent-breakpoint-registry` — open PR to merge.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 

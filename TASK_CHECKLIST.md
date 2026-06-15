@@ -16,8 +16,8 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-01 | `chore/repo-scaffold` | 1.1–1.4 | 4/4 | ✅ merged |
 | PR-02 | `feat/target-core-layers` | 2.1–2.3 | 3/3 | ✅ merged |
 | PR-03 | `feat/target-http-server` | 2.4–2.6 | 3/3 | ✅ merged |
-| PR-04 | `feat/agent-data-models` | 4.1–4.2 | 2/2 | ✅ ready for PR |
-| PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 0/5 | ⬜ todo |
+| PR-04 | `feat/agent-data-models` | 4.1–4.2 | 2/2 | ✅ merged |
+| PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 5/5 | ✅ ready for PR |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 0/2 | ⬜ todo |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 0/3 | ⬜ todo |
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 0/6 | ⬜ todo |
@@ -680,7 +680,7 @@ feat(agent): add Breakpoint and CaptureMode models
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done |
 | **Branch** | `feat/agent-data-models` |
 | **Requirements** | R10, R20 |
 | **Files** | `agent/models.py` |
@@ -697,13 +697,22 @@ feat(agent): add Breakpoint and CaptureMode models
 ```text
 Import smoke test for RawCapture, RawFrame, Snapshot, StackFrame
 pytest tests/ -q → 18 passed
+Merged via PR #4 (merge f96581f); CI green
 ```
 
 **Placeholder commit:** `feat(agent): add RawCapture, Snapshot, StackFrame models`
 
-**Actual commit hash:**
+**Actual commit hash:** `a19020a`
 
 **Actual commit message:**
+
+```text
+feat(agent): add RawCapture, Snapshot, StackFrame models
+
+- Add TraceEvent, RawFrame, RawCapture (immutable sync copies, section 5.5)
+- Add StackFrame and Snapshot for worker JSON output (section 5.7)
+- Update TASK_CHECKLIST and CONTEXT: PR-04 complete, PR draft ready
+```
 
 **Notes:**
 
@@ -712,8 +721,8 @@ pytest tests/ -q → 18 passed
 **PR-04 merge checklist:**
 
 - [x] All tasks 4.1–4.2 ✅
-- [ ] CI green on PR
-- [ ] PR merged to `main`
+- [x] CI green on PR
+- [x] PR merged to `main` (PR #4, merge `f96581f`)
 
 **Pull request draft** *(copy to GitHub after task 4.2 push):*
 
@@ -756,15 +765,264 @@ Depends on PR-01/PR-03 on main. Enables PR-05 (registry) and PR-06/07 (serialize
 
 ## PR-05 — `feat/agent-breakpoint-registry`
 
-| Task | Status | Files | Req |
-|------|--------|-------|-----|
-| **5.1** path normalization | ⬜ | `agent/breakpoints.py` | R22 |
-| **5.2** matchers | ⬜ | `agent/breakpoints.py`, `tests/test_breakpoints.py` | R5–R7 |
-| **5.3** registry indexes | ⬜ | `agent/registry.py`, `tests/test_registry.py` | R21 |
-| **5.4** multiple BPs | ⬜ | `agent/registry.py` | R20 |
-| **5.5** breakpoints.yaml | ⬜ | `breakpoints.yaml` | R29 |
+### Task 5.1 — Path normalization
 
-_Record commit hash / message / verification per task when done._
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done |
+| **Branch** | `feat/agent-breakpoint-registry` |
+| **Requirements** | R22 |
+| **Files** | `agent/breakpoints.py`, `tests/test_breakpoints.py` |
+| **Done when** | `normalize_path()` via `Path.resolve()`; unit tests pass |
+
+**Delivered:**
+
+- `normalize_path(path)` → canonical absolute path string for file_line matching
+- `tests/test_breakpoints.py` — 4 path normalization cases (relative, string/path, dot segments, stability)
+
+**Verification:**
+
+```text
+pytest tests/test_breakpoints.py -q → 4 passed
+pytest tests/ -q → 22 passed
+Pushed to origin/feat/agent-breakpoint-registry; CI green
+```
+
+**Placeholder commit:** `feat(agent): add path normalization helper`
+
+**Actual commit hash:** `05dcf8e`
+
+**Actual commit message:**
+
+```text
+feat(agent): add path normalization helper
+
+- Add agent/breakpoints.py with normalize_path via Path.resolve()
+- Add tests/test_breakpoints.py with 4 path normalization cases
+- Update TASK_CHECKLIST and CONTEXT: PR-04 merged, PR-05 task 5.1 done
+```
+
+**Notes:**
+
+---
+
+### Task 5.2 — Breakpoint matchers
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done |
+| **Branch** | `feat/agent-breakpoint-registry` |
+| **Requirements** | R5, R6, R7 |
+| **Files** | `agent/breakpoints.py`, `tests/test_breakpoints.py` |
+| **Done when** | function=`co_name`, method=`co_qualname`, file_line=`file`+`line` |
+
+**Delivered:**
+
+- `matches_function_breakpoint` — `co_name` on `call`
+- `matches_method_breakpoint` — exact `co_qualname` on `call`
+- `matches_file_line_breakpoint` — normalized `file` + `line` on `line`
+- `matches_breakpoint` — dispatches by `Breakpoint.type`
+
+**Verification:**
+
+```text
+pytest tests/test_breakpoints.py -q → 8 passed
+pytest tests/ -q → 26 passed
+Pushed to origin/feat/agent-breakpoint-registry; CI green
+```
+
+**Placeholder commit:** `feat(agent): add breakpoint matchers`
+
+**Actual commit hash:** `1852668`
+
+**Actual commit message:**
+
+```text
+feat(agent): add breakpoint matchers
+
+- Add function/method/file_line matchers and matches_breakpoint dispatcher
+- function: co_name on call; method: exact co_qualname; file_line: normalized path + line
+- Extend tests/test_breakpoints.py with 4 matcher tests (26 total pytest)
+- Update TASK_CHECKLIST and CONTEXT: task 5.1 committed, 5.2 done
+```
+
+**Notes:**
+
+---
+
+### Task 5.3 — BreakpointRegistry indexes
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done |
+| **Branch** | `feat/agent-breakpoint-registry` |
+| **Requirements** | R21 |
+| **Files** | `agent/registry.py`, `tests/test_registry.py` |
+| **Done when** | O(1) indexes per §5.6; thread-safe register |
+
+**Delivered:**
+
+- `BreakpointRegistry` — `threading.RLock`, `register`, `get`, `list_all`
+- Indexes: `function_names`, `method_qualnames`, `watched_files`, `*_bps_by_*` dicts
+- Lookup helpers: `get_function/method/line_breakpoint_ids`, `has_any_function_or_method_bp`
+- Upsert by `id` rebuilds indexes on each register
+
+**Verification:**
+
+```text
+pytest tests/test_registry.py -q → 5 passed
+pytest tests/ -q → 31 passed
+Pushed to origin/feat/agent-breakpoint-registry
+```
+
+**Placeholder commit:** `feat(agent): add BreakpointRegistry with O(1) indexes`
+
+**Actual commit hash:** `64844b5`
+
+**Actual commit message:**
+
+```text
+feat(agent): add BreakpointRegistry with O(1) indexes
+
+- Add thread-safe BreakpointRegistry with register/get and index rebuild
+- O(1) sets and dicts for function, method, and file_line lookups
+- Add tests/test_registry.py with 5 registry tests (31 total pytest)
+- Update TASK_CHECKLIST and CONTEXT: task 5.2 committed, 5.3 done
+```
+
+**Notes:**
+
+---
+
+### Task 5.4 — Multiple breakpoints per target
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done |
+| **Branch** | `feat/agent-breakpoint-registry` |
+| **Requirements** | R20 |
+| **Files** | `agent/registry.py`, `tests/test_registry.py` |
+| **Done when** | Same name/line → list of bp_ids; no deduplication |
+
+**Delivered:**
+
+- `get_matching_breakpoint_ids(...)` — returns all ids for call/line events (§5.3.1)
+- Multiple function BPs sharing `co_name` → distinct ids in registration order
+- Same for method qualname and file_line location
+
+**Verification:**
+
+```text
+pytest tests/test_registry.py -q → 8 passed
+pytest tests/ -q → 34 passed
+Pushed to origin/feat/agent-breakpoint-registry; CI green
+```
+
+**Placeholder commit:** `feat(agent): support multiple BPs per name/line`
+
+**Actual commit hash:** `b7e13d8`
+
+**Actual commit message:**
+
+```text
+feat(agent): support multiple BPs per name/line
+
+- Add get_matching_breakpoint_ids for call and line events
+- Return all bp ids sharing co_name, qualname, or file+line (no deduplication)
+- Add registry tests for multiple BPs on same target (34 total pytest)
+- Update TASK_CHECKLIST and CONTEXT: task 5.3 committed, 5.4 done
+```
+
+**Notes:**
+
+---
+
+### Task 5.5 — breakpoints.yaml seed loader
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-breakpoint-registry` |
+| **Requirements** | R29 |
+| **Files** | `breakpoints.yaml`, `agent/breakpoints.py`, `tests/test_breakpoints_yaml.py`, `requirements.txt` |
+| **Done when** | Loader registers function, method, file_line examples |
+
+**Delivered:**
+
+- `breakpoints.yaml` — seed examples: function `compute`, method `AdditionEngine.add`, file_line `addition.py:5`
+- `breakpoint_from_dict`, `load_breakpoints_yaml` — PyYAML loader into registry
+- `requirements.txt` — `PyYAML>=6.0,<7`
+- `tests/test_breakpoints_yaml.py` — 4 loader tests
+
+**Verification:**
+
+```text
+pytest tests/test_breakpoints_yaml.py -q → 4 passed
+pytest tests/ -q → 38 passed
+```
+
+**Placeholder commit:** `feat(agent): load breakpoints.yaml seed config`
+
+**Actual commit hash:**
+
+**Actual commit message:**
+
+**Notes:**
+
+---
+
+**PR-05 merge checklist:**
+
+- [x] All tasks 5.1–5.5 ✅
+- [ ] CI green on PR
+- [ ] PR merged to `main`
+
+**Pull request draft** *(copy to GitHub after task 5.5 push):*
+
+| Field | Value |
+|-------|--------|
+| **When** | Now — after task 5.5 commit + push |
+| **Base ← Compare** | `main` ← `feat/agent-breakpoint-registry` |
+| **Title** | `feat(agent): breakpoint registry (PR-05)` |
+
+**Description** (paste into GitHub PR body):
+
+```markdown
+## Summary
+Breakpoint matching, thread-safe registry with O(1) indexes, multi-BP support, and YAML seed config.
+
+## Tasks included
+
+### Task 5.1 — Path normalization
+- **Files:** `agent/breakpoints.py`, `tests/test_breakpoints.py`
+- **Behavior:** `normalize_path()` via `Path.resolve()`
+
+### Task 5.2 — Matchers
+- **Files:** `agent/breakpoints.py`
+- **Behavior:** function/method/file_line matchers + dispatcher
+
+### Task 5.3 — BreakpointRegistry
+- **Files:** `agent/registry.py`, `tests/test_registry.py`
+- **Behavior:** Thread-safe registry with O(1) indexes
+
+### Task 5.4 — Multiple BPs per target
+- **Files:** `agent/registry.py`
+- **Behavior:** `get_matching_breakpoint_ids` — all ids, no deduplication
+
+### Task 5.5 — YAML seed
+- **Files:** `breakpoints.yaml`, loader in `agent/breakpoints.py`, `requirements.txt`
+- **Behavior:** Load function, method, file_line seed breakpoints at startup
+
+## Requirements touched
+R5–R7 · R20–R22 · R29
+
+## Test plan
+- [ ] `ci` workflow green
+- [ ] `pytest tests/ -q` — 38 passed
+
+## Merge notes
+Depends on PR-04. Enables PR-08 (tracer) and PR-09 (control API).
+```
 
 ---
 
