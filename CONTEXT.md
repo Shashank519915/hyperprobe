@@ -34,7 +34,8 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 hyperprobe/
 ├── agent/              # instrumentation (later)
 ├── target/
-│   ├── handlers.py     # layer 1 — RouteHandler (PR-03)
+│   ├── handlers.py     # layer 1 — RouteHandler
+│   ├── server.py       # ThreadingHTTPServer :8080 (PR-03)
 │   ├── engines/        # layer 3 — add/sub/mul/div engines
 │   └── services/       # layer 2 — MathService
 ├── tests/
@@ -65,6 +66,17 @@ hyperprobe/
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 2.5 complete (local)
+
+- Added `target/server.py` — ThreadingHTTPServer on :8080, `GET /calculate` JSON API
+- Three-layer chain complete: handler → service → engine
+- Next: commit 2.5, then task 2.6 (HTTP tests + purity script)
+
+### 2026-06-16 — Task 2.4 committed
+
+- Commit `8cafeff`: RouteHandler for /calculate
+- CI green on `feat/target-http-server`
 
 ### 2026-06-16 — Task 2.4 complete (local)
 

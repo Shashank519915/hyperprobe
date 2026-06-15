@@ -15,7 +15,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 |----|--------|-------|------|--------|
 | PR-01 | `chore/repo-scaffold` | 1.1–1.4 | 4/4 | ✅ merged |
 | PR-02 | `feat/target-core-layers` | 2.1–2.3 | 3/3 | ✅ merged |
-| PR-03 | `feat/target-http-server` | 2.4–2.6 | 1/3 | 🔄 in progress |
+| PR-03 | `feat/target-http-server` | 2.4–2.6 | 2/3 | 🔄 in progress |
 | PR-04 | `feat/agent-data-models` | 4.1–4.2 | 0/2 | ⬜ todo |
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 0/5 | ⬜ todo |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 0/2 | ⬜ todo |
@@ -453,7 +453,7 @@ Depends on PR-01 merged. After merge, branch `feat/target-http-server` from upda
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done |
 | **Branch** | `feat/target-http-server` |
 | **Requirements** | R1, R2 |
 | **Files** | `target/handlers.py` |
@@ -470,27 +470,60 @@ Depends on PR-01 merged. After merge, branch `feat/target-http-server` from upda
 ```text
 RouteHandler().handle_calculate('op=add&a=10&b=20') → result 30.0
 pytest tests/ -q → 11 passed
+Pushed to origin/feat/target-http-server
 ```
 
 **Placeholder commit:** `feat(target): add RouteHandler for /calculate`
+
+**Actual commit hash:** `8cafeff`
+
+**Actual commit message:**
+
+```text
+feat(target): add RouteHandler for /calculate
+
+- Add RouteHandler.handle_calculate parsing op/a/b query params
+- Delegate to MathService; return op/a/b/result dict
+- Raise ValueError for missing or invalid parameters
+- Update TASK_CHECKLIST and CONTEXT: PR-02 merged, PR-03 task 2.4 done
+```
+
+**Notes:** CI green on push.
+
+---
+
+### Task 2.5 — ThreadingHTTPServer
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/target-http-server` |
+| **Requirements** | R1, R2, R3 |
+| **Files** | `target/server.py` |
+| **Done when** | `GET /calculate?op=add&a=10&b=20` → JSON on :8080 |
+
+**Delivered:**
+
+- `target/server.py` — stdlib `ThreadingHTTPServer` on `0.0.0.0:8080`
+- `GET /calculate` → JSON 200; bad params/op → 400; unknown path → 404
+- `create_server()` / `run_server()` for bootstrap import; `if __name__` for dev
+- `log_message` suppressed (no stderr access logs)
+
+**Verification:**
+
+```text
+HTTP smoke test on 127.0.0.1:18080 — add → 200/30.0, div/0 → 400, /unknown → 404
+pytest tests/ -q → 11 passed
+Dev: python -m target.server then curl localhost:8080/calculate?op=add&a=10&b=20
+```
+
+**Placeholder commit:** `feat(target): add ThreadingHTTPServer on :8080`
 
 **Actual commit hash:**
 
 **Actual commit message:**
 
 **Notes:**
-
----
-
-### Task 2.5 — ThreadingHTTPServer
-
-| Status | ⬜ todo | **Files** | `target/server.py` | **Req** | R1 |
-
-**Placeholder commit:** `feat(target): add ThreadingHTTPServer on :8080`
-
-**Done when:** `curl localhost:8080/calculate?op=add&a=10&b=20` → JSON result
-
-**Actual commit hash:** · **Actual commit message:** · **Verification:** · **Notes:**
 
 ---
 
