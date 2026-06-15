@@ -14,7 +14,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR | Branch | Tasks | Done | Status |
 |----|--------|-------|------|--------|
 | PR-01 | `chore/repo-scaffold` | 1.1–1.4 | 4/4 | ✅ merged |
-| PR-02 | `feat/target-core-layers` | 2.1–2.3 | 1/3 | 🔄 in progress |
+| PR-02 | `feat/target-core-layers` | 2.1–2.3 | 2/3 | 🔄 in progress |
 | PR-03 | `feat/target-http-server` | 2.4–2.6 | 0/3 | ⬜ todo |
 | PR-04 | `feat/agent-data-models` | 4.1–4.2 | 0/2 | ⬜ todo |
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 0/5 | ⬜ todo |
@@ -270,7 +270,7 @@ First PR — no merge dependency. After merge, branch `feat/target-core-layers` 
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done |
 | **Branch** | `feat/target-core-layers` |
 | **Requirements** | R2, R3, R14 |
 | **Files** | `target/engines/addition.py`, `subtraction.py`, `multiplication.py`, `division.py` |
@@ -289,15 +289,24 @@ First PR — no merge dependency. After merge, branch `feat/target-core-layers` 
 python -c "from target.engines...; assert AdditionEngine().add(10, 20) == 30; ..." → OK
 pytest tests/ -q → no tests ran, exit 0
 No agent imports, logging, or print in target/engines/
+Pushed to origin/feat/target-core-layers (commit 3d89b08)
 ```
 
 **Placeholder commit:** `feat(target): add operation engines (add/sub/mul/div)`
 
-**Actual commit hash:**
+**Actual commit hash:** `3d89b08`
 
 **Actual commit message:**
 
-**Notes:** Method qualnames (e.g. `AdditionEngine.add`) align with architecture breakpoint examples.
+```text
+feat(target): add operation engines (add/sub/mul/div)
+
+- Add AdditionEngine, SubtractionEngine, MultiplicationEngine, DivisionEngine
+- Pure layer-3 math; no I/O, logging, or agent imports
+- Update TASK_CHECKLIST and CONTEXT: PR-01 merged, PR-02 task 2.1 done
+```
+
+**Notes:** Method qualnames (e.g. `AdditionEngine.add`) align with architecture breakpoint examples. Branch on remote: `feat/target-core-layers` (not `feat/core-target-layers`).
 
 ---
 
@@ -305,15 +314,33 @@ No agent imports, logging, or print in target/engines/
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ⬜ todo |
+| **Status** | ✅ done (commit pending) |
 | **Branch** | `feat/target-core-layers` |
 | **Requirements** | R2 |
 | **Files** | `target/services/math_service.py` |
 | **Done when** | `MathService.compute(op, a, b)` routes to engines |
 
+**Delivered:**
+
+- `MathService.compute(op, a, b)` — routes `add` / `sub` / `mul` / `div` to layer-3 engines
+- Unknown `op` raises `ValueError` (handler maps to HTTP 400 in task 2.4)
+- `ZeroDivisionError` propagates from `DivisionEngine` unchanged
+
+**Verification:**
+
+```text
+MathService().compute('add', 10, 20) == 30
+MathService().compute('sub'|'mul'|'div', ...) → OK
+pytest tests/ -q → no tests ran, exit 0
+```
+
 **Placeholder commit:** `feat(target): add MathService routing to engines`
 
-**Actual commit hash:** · **Actual commit message:** · **Verification:** · **Notes:**
+**Actual commit hash:**
+
+**Actual commit message:**
+
+**Notes:**
 
 ---
 

@@ -34,7 +34,8 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 hyperprobe/
 ├── agent/              # instrumentation (later)
 ├── target/
-│   └── engines/        # layer 3 — add/sub/mul/div engines (PR-02)
+│   ├── engines/        # layer 3 — add/sub/mul/div engines
+│   └── services/       # layer 2 — MathService (PR-02)
 ├── tests/
 ├── scripts/
 ├── snapshots/
@@ -63,6 +64,13 @@ hyperprobe/
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 2.2 complete (local)
+
+- Added `target/services/math_service.py` — `MathService.compute(op, a, b)`
+- Routes `add` / `sub` / `mul` / `div` to engines; unknown op → `ValueError`
+- Verified task 2.1 push: commit `3d89b08` on `origin/feat/target-core-layers`
+- Next: commit 2.2, then task 2.3 (unit tests)
 
 ### 2026-06-15 — PR-01 merged; task 2.1 complete (local)
 
