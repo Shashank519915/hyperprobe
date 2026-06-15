@@ -1,7 +1,8 @@
 """Shared pytest fixtures for HyperProbe tests."""
 
+import sys
+from pathlib import Path
 
-def pytest_sessionfinish(session, exitstatus):
-    """Scaffold phase: no test modules yet — exit 0 instead of pytest's code 5."""
-    if exitstatus == 5:
-        session.exitstatus = 0
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))

@@ -12,7 +12,7 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 | **GitHub** | https://github.com/Shashank519915/hyperprobe.git |
 | **Structure** | Monorepo — `target/` + `agent/` in one repo |
 | **Default branch** | `main` |
-| **Active branch** | `chore/repo-scaffold` (PR-01) |
+| **Active branch** | `feat/target-core-layers` (PR-02) |
 | **CI workflows** | `ci` (pytest + purity) · `Dependency Graph` (Dependabot — automatic) |
 
 ---
@@ -33,7 +33,9 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 ```text
 hyperprobe/
 ├── agent/              # instrumentation (later)
-├── target/             # calculator (later)
+├── target/
+│   ├── engines/        # layer 3 — add/sub/mul/div engines
+│   └── services/       # layer 2 — MathService (PR-02)
 ├── tests/
 ├── scripts/
 ├── snapshots/
@@ -62,6 +64,31 @@ hyperprobe/
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 2.3 complete (local)
+
+- Added `tests/test_target_math.py` — 11 tests (engines + MathService)
+- Updated `tests/conftest.py` — repo root on sys.path; removed scaffold hook
+- PR-02 ready — open PR after commit + push
+- Next: commit 2.3, push, open PR-02
+
+### 2026-06-16 — Task 2.2 committed
+
+- Commit `6fb0c56`: MathService routing to engines
+- Pushed to `origin/feat/target-core-layers`
+
+### 2026-06-16 — Task 2.2 complete (local)
+
+- Added `target/services/math_service.py` — `MathService.compute(op, a, b)`
+- Routes `add` / `sub` / `mul` / `div` to engines; unknown op → `ValueError`
+- Verified task 2.1 push: commit `3d89b08` on `origin/feat/target-core-layers`
+- Next: commit 2.2, then task 2.3 (unit tests)
+
+### 2026-06-15 — PR-01 merged; task 2.1 complete (local)
+
+- PR #1 merged to `main` (merge `9c3b6a1`); branched `feat/target-core-layers` from updated `main`
+- Task 2.1: four operation engines in `target/engines/` (pure classes, no I/O)
+- Next: commit 2.1, then task 2.2 (MathService)
 
 ### 2026-06-15 — Task 1.4 complete (local)
 
@@ -110,11 +137,11 @@ Append newest entries at the **top**.
 
 ---
 
-## Git: creating `main` branch
+## Git workflow
 
-`main` exists on GitHub as default branch (same scaffold snapshot for now).
+PR-01 merged to `main`. Current work: **PR-02** on `feat/target-core-layers`.
 
-Finish PR-01 on `chore/repo-scaffold` — task 1.4 done; open PR → merge into `main`.
+After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
 ---
 
