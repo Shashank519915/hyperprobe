@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Target purity check — ensures calculator code stays free of observability hooks.
-# Stub in PR-01: passes when target/ is absent. Stricter rules added in PR-03 (task 2.6).
 
 set -euo pipefail
 
@@ -14,15 +13,18 @@ if [[ ! -d "${TARGET}" ]]; then
   exit 0
 fi
 
-# --- enforced once target/ exists (expanded in task 2.6) ---
-
 if grep -R --include='*.py' -E '(^|[[:space:]])import[[:space:]]+agent|from[[:space:]]+agent' "${TARGET}" 2>/dev/null; then
   echo "FAIL: target/ must not import agent"
   exit 1
 fi
 
-if grep -R --include='*.py' -E '^[[:space:]]*(import logging|from logging|import agent|print\()' "${TARGET}" 2>/dev/null; then
-  echo "FAIL: target/ must not use logging, agent imports, or print"
+if grep -R --include='*.py' -E '^[[:space:]]*(import logging|from logging|print\()' "${TARGET}" 2>/dev/null; then
+  echo "FAIL: target/ must not use logging or print"
+  exit 1
+fi
+
+if grep -R --include='*.py' -E '(sys\.settrace|threading\.settrace|import trace|from trace|opentelemetry|OpenTelemetry)' "${TARGET}" 2>/dev/null; then
+  echo "FAIL: target/ must not use tracing or instrumentation hooks"
   exit 1
 fi
 

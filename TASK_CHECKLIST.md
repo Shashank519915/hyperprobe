@@ -14,8 +14,8 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR | Branch | Tasks | Done | Status |
 |----|--------|-------|------|--------|
 | PR-01 | `chore/repo-scaffold` | 1.1–1.4 | 4/4 | ✅ merged |
-| PR-02 | `feat/target-core-layers` | 2.1–2.3 | 3/3 | ✅ ready for PR |
-| PR-03 | `feat/target-http-server` | 2.4–2.6 | 0/3 | ⬜ todo |
+| PR-02 | `feat/target-core-layers` | 2.1–2.3 | 3/3 | ✅ merged |
+| PR-03 | `feat/target-http-server` | 2.4–2.6 | 3/3 | ✅ ready for PR |
 | PR-04 | `feat/agent-data-models` | 4.1–4.2 | 0/2 | ⬜ todo |
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 0/5 | ⬜ todo |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 0/2 | ⬜ todo |
@@ -357,7 +357,7 @@ feat(target): add MathService routing to engines
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done |
 | **Branch** | `feat/target-core-layers` |
 | **Requirements** | R2 |
 | **Files** | `tests/test_target_math.py`, `tests/conftest.py` |
@@ -374,13 +374,23 @@ feat(target): add MathService routing to engines
 ```text
 pytest tests/ -q → 11 passed
 No agent imports in tests/test_target_math.py
+Pushed to origin/feat/target-core-layers
 ```
 
 **Placeholder commit:** `test(target): unit test MathService and engines`
 
-**Actual commit hash:**
+**Actual commit hash:** `086bed6` (merged via PR #2)
 
 **Actual commit message:**
+
+```text
+test(target): unit test MathService and engines
+
+- Add tests/test_target_math.py with 11 cases for engines and MathService
+- Update conftest.py: repo root on sys.path for target imports
+- Remove scaffold exit-5 hook now that tests exist
+- Update TASK_CHECKLIST and CONTEXT: PR-02 ready, PR draft included
+```
 
 **Notes:**
 
@@ -389,8 +399,8 @@ No agent imports in tests/test_target_math.py
 **PR-02 merge checklist:**
 
 - [x] All tasks 2.1–2.3 ✅
-- [ ] CI green on PR
-- [ ] PR merged to `main`
+- [x] CI green on PR
+- [x] PR merged to `main` (PR #2, merge `c387258`)
 
 **Pull request draft** *(copy to GitHub after task 2.3 push):*
 
@@ -441,33 +451,175 @@ Depends on PR-01 merged. After merge, branch `feat/target-http-server` from upda
 
 ### Task 2.4 — RouteHandler
 
-| Status | ⬜ todo | **Files** | `target/handlers.py` | **Req** | R1, R2 |
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done |
+| **Branch** | `feat/target-http-server` |
+| **Requirements** | R1, R2 |
+| **Files** | `target/handlers.py` |
+| **Done when** | Parses query, calls MathService, returns result dict |
+
+**Delivered:**
+
+- `RouteHandler.handle_calculate(query_string)` → `{"op", "a", "b", "result"}`
+- `RouteHandler.parse_calculate_query` — extracts `op`, `a`, `b`; missing/invalid params → `ValueError`
+- `ValueError` / `ZeroDivisionError` propagate for HTTP mapping in task 2.5
+
+**Verification:**
+
+```text
+RouteHandler().handle_calculate('op=add&a=10&b=20') → result 30.0
+pytest tests/ -q → 11 passed
+Pushed to origin/feat/target-http-server
+```
 
 **Placeholder commit:** `feat(target): add RouteHandler for /calculate`
 
-**Actual commit hash:** · **Actual commit message:** · **Verification:** · **Notes:**
+**Actual commit hash:** `8cafeff`
+
+**Actual commit message:**
+
+```text
+feat(target): add RouteHandler for /calculate
+
+- Add RouteHandler.handle_calculate parsing op/a/b query params
+- Delegate to MathService; return op/a/b/result dict
+- Raise ValueError for missing or invalid parameters
+- Update TASK_CHECKLIST and CONTEXT: PR-02 merged, PR-03 task 2.4 done
+```
+
+**Notes:** CI green on push.
 
 ---
 
 ### Task 2.5 — ThreadingHTTPServer
 
-| Status | ⬜ todo | **Files** | `target/server.py` | **Req** | R1 |
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done |
+| **Branch** | `feat/target-http-server` |
+| **Requirements** | R1, R2, R3 |
+| **Files** | `target/server.py` |
+| **Done when** | `GET /calculate?op=add&a=10&b=20` → JSON on :8080 |
+
+**Delivered:**
+
+- `target/server.py` — stdlib `ThreadingHTTPServer` on `0.0.0.0:8080`
+- `GET /calculate` → JSON 200; bad params/op → 400; unknown path → 404
+- `create_server()` / `run_server()` for bootstrap import; `if __name__` for dev
+- `log_message` suppressed (no stderr access logs)
+
+**Verification:**
+
+```text
+Manual: python -m target.server + curl → 200 {"op":"add","a":10.0,"b":20.0,"result":30.0}
+HTTP smoke test on ephemeral port — add/div/0/404 OK
+pytest tests/ -q → 11 passed (before 2.6)
+Pushed to origin/feat/target-http-server; CI green
+```
 
 **Placeholder commit:** `feat(target): add ThreadingHTTPServer on :8080`
 
-**Done when:** `curl localhost:8080/calculate?op=add&a=10&b=20` → JSON result
+**Actual commit hash:** `a220208`
 
-**Actual commit hash:** · **Actual commit message:** · **Verification:** · **Notes:**
+**Actual commit message:**
+
+```text
+feat(target): add ThreadingHTTPServer on :8080
+
+- Add target/server.py with GET /calculate JSON endpoint
+- Wire RouteHandler; map ValueError and ZeroDivisionError to 400
+- Export create_server/run_server for bootstrap; dev entry via python -m
+- Suppress BaseHTTPRequestHandler access logs (zero observability)
+- Update TASK_CHECKLIST and CONTEXT: task 2.4 committed, 2.5 done
+```
+
+**Notes:** PowerShell `curl` is `Invoke-WebRequest` — use `curl.exe` or `-UseBasicParsing` in README (see `notes/DEMO_COMMANDS.md`).
 
 ---
 
 ### Task 2.6 — HTTP tests + purity script update
 
-| Status | ⬜ todo | **Files** | tests, `scripts/check_target_purity.sh` | **Req** | R3 |
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/target-http-server` |
+| **Requirements** | R1, R3 |
+| **Files** | `tests/test_target_http.py`, `scripts/check_target_purity.sh` |
+| **Done when** | pytest passes; purity script passes |
+
+**Delivered:**
+
+- `tests/test_target_http.py` — 7 HTTP integration tests (no agent, ephemeral port)
+- Covers: add/sub/mul/div, 400 errors, 404, no agent imports in `target/`
+- `scripts/check_target_purity.sh` — expanded: agent, logging, print, trace/settrace/opentelemetry
+- `notes/DEMO_COMMANDS.md` — local command/output log for human README (gitignored)
+
+**Verification:**
+
+```text
+pytest tests/ -q → 18 passed
+bash scripts/check_target_purity.sh → OK (CI/Linux)
+```
 
 **Placeholder commit:** `test(target): HTTP integration test without agent`
 
-**Actual commit hash:** · **Actual commit message:** · **Verification:** · **Notes:**
+**Actual commit hash:**
+
+**Actual commit message:**
+
+**Notes:**
+
+---
+
+**PR-03 merge checklist:**
+
+- [x] All tasks 2.4–2.6 ✅
+- [ ] CI green on PR
+- [ ] PR merged to `main`
+
+**Pull request draft** *(copy to GitHub after task 2.6 push):*
+
+| Field | Value |
+|-------|--------|
+| **When** | Now — after task 2.6 commit + push |
+| **Base ← Compare** | `main` ← `feat/target-http-server` |
+| **Title** | `feat(target): HTTP calculator server (PR-03)` |
+
+**Description** (paste into GitHub PR body):
+
+```markdown
+## Summary
+Complete pristine calculator target: 3-layer stack + HTTP server on :8080. No agent code.
+
+## Tasks included
+
+### Task 2.4 — RouteHandler
+- **Files:** `target/handlers.py`
+- **Behavior:** Parse `op`/`a`/`b` query; delegate to MathService; return result dict
+- **Verification:** Unit smoke test
+
+### Task 2.5 — ThreadingHTTPServer
+- **Files:** `target/server.py`
+- **Behavior:** `GET /calculate` JSON on :8080; 400/404 error handling; no access logs
+- **Verification:** `python -m target.server` + curl
+
+### Task 2.6 — HTTP tests + purity
+- **Files:** `tests/test_target_http.py`, `scripts/check_target_purity.sh`
+- **Behavior:** 7 HTTP integration tests; stricter purity grep rules
+- **Verification:** `pytest tests/ -q` — 18 passed; purity script OK
+
+## Requirements touched
+R1 · R2 · R3 · R14
+
+## Test plan
+- [ ] `ci` workflow green
+- [ ] `pytest tests/ -q` — 18 passed
+- [ ] `bash scripts/check_target_purity.sh` — OK
+
+## Merge notes
+Depends on PR-02 merged. After merge, can start PR-04 (`feat/agent-data-models`) in parallel with agent work.
+```
 
 ---
 
