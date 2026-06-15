@@ -71,6 +71,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 5.4 complete (local)
+
+- Added `get_matching_breakpoint_ids` — all matching bp ids, no deduplication
+- Tests: multiple function/method/file_line BPs on same target (34 pytest total)
+- Next: commit 5.4, then task 5.5 (breakpoints.yaml loader)
+
+### 2026-06-16 — Task 5.3 committed
+
+- Commit `64844b5`: BreakpointRegistry with O(1) indexes
+
 ### 2026-06-16 — Task 5.3 complete (local)
 
 - Added `agent/registry.py` — thread-safe BreakpointRegistry with O(1) indexes

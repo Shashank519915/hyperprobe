@@ -1,7 +1,7 @@
 import threading
 
 from agent.breakpoints import normalize_path
-from agent.models import Breakpoint, BreakpointType
+from agent.models import Breakpoint, BreakpointType, TraceEvent
 
 
 class BreakpointRegistry:
@@ -71,6 +71,28 @@ class BreakpointRegistry:
         with self._lock:
             path = normalize_path(co_filename)
             return list(self._line_bps_by_file.get(path, {}).get(lineno, []))
+
+    def get_matching_breakpoint_ids(
+        self,
+        *,
+        co_name: str,
+        co_qualname: str,
+        co_filename: str,
+        lineno: int,
+        event: TraceEvent | str,
+    ) -> list[str]:
+        """Return all breakpoint ids matching this trace event — no deduplication (§5.3.1)."""
+        event_name = event.value if isinstance(event, TraceEvent) else event
+        with self._lock:
+            if event_name == TraceEvent.CALL.value:
+                matched: list[str] = []
+                matched.extend(self._function_bps_by_name.get(co_name, []))
+                matched.extend(self._method_bps_by_qualname.get(co_qualname, []))
+                return matched
+            if event_name == TraceEvent.LINE.value:
+                path = normalize_path(co_filename)
+                return list(self._line_bps_by_file.get(path, {}).get(lineno, []))
+            return []
 
     def _rebuild_indexes(self) -> None:
         self._function_names: set[str] = set()

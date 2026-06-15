@@ -17,7 +17,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-02 | `feat/target-core-layers` | 2.1–2.3 | 3/3 | ✅ merged |
 | PR-03 | `feat/target-http-server` | 2.4–2.6 | 3/3 | ✅ merged |
 | PR-04 | `feat/agent-data-models` | 4.1–4.2 | 2/2 | ✅ merged |
-| PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 3/5 | 🔄 in progress |
+| PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 4/5 | 🔄 in progress |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 0/2 | ⬜ todo |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 0/3 | ⬜ todo |
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 0/6 | ⬜ todo |
@@ -854,7 +854,7 @@ feat(agent): add breakpoint matchers
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done |
 | **Branch** | `feat/agent-breakpoint-registry` |
 | **Requirements** | R21 |
 | **Files** | `agent/registry.py`, `tests/test_registry.py` |
@@ -872,9 +872,52 @@ feat(agent): add breakpoint matchers
 ```text
 pytest tests/test_registry.py -q → 5 passed
 pytest tests/ -q → 31 passed
+Pushed to origin/feat/agent-breakpoint-registry
 ```
 
 **Placeholder commit:** `feat(agent): add BreakpointRegistry with O(1) indexes`
+
+**Actual commit hash:** `64844b5`
+
+**Actual commit message:**
+
+```text
+feat(agent): add BreakpointRegistry with O(1) indexes
+
+- Add thread-safe BreakpointRegistry with register/get and index rebuild
+- O(1) sets and dicts for function, method, and file_line lookups
+- Add tests/test_registry.py with 5 registry tests (31 total pytest)
+- Update TASK_CHECKLIST and CONTEXT: task 5.2 committed, 5.3 done
+```
+
+**Notes:**
+
+---
+
+### Task 5.4 — Multiple breakpoints per target
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-breakpoint-registry` |
+| **Requirements** | R20 |
+| **Files** | `agent/registry.py`, `tests/test_registry.py` |
+| **Done when** | Same name/line → list of bp_ids; no deduplication |
+
+**Delivered:**
+
+- `get_matching_breakpoint_ids(...)` — returns all ids for call/line events (§5.3.1)
+- Multiple function BPs sharing `co_name` → distinct ids in registration order
+- Same for method qualname and file_line location
+
+**Verification:**
+
+```text
+pytest tests/test_registry.py -q → 8 passed
+pytest tests/ -q → 34 passed
+```
+
+**Placeholder commit:** `feat(agent): support multiple BPs per name/line`
 
 **Actual commit hash:**
 
@@ -886,7 +929,6 @@ pytest tests/ -q → 31 passed
 
 | Task | Status | Files | Req |
 |------|--------|-------|-----|
-| **5.4** multiple BPs | ⬜ | `agent/registry.py`, `tests/test_registry.py` | R20 |
 | **5.5** breakpoints.yaml | ⬜ | `breakpoints.yaml` | R29 |
 
 _Record commit hash / message / verification per task when done._
