@@ -70,6 +70,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 5.2 complete (local)
+
+- Added breakpoint matchers: function, method, file_line + `matches_breakpoint` dispatcher
+- Extended `tests/test_breakpoints.py` — 8 tests total; pytest 26 passed
+- Next: commit 5.2, then task 5.3 (registry indexes)
+
+### 2026-06-16 — Task 5.1 committed
+
+- Commit `05dcf8e`: `normalize_path`; CI green on push
+
 ### 2026-06-16 — Task 5.1 complete (local)
 
 - Added `agent/breakpoints.py` — `normalize_path()` via `Path.resolve()`
