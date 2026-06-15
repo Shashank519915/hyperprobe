@@ -13,7 +13,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 
 | PR | Branch | Tasks | Done | Status |
 |----|--------|-------|------|--------|
-| PR-01 | `chore/repo-scaffold` | 1.1–1.4 | 3/4 | 🔄 in progress |
+| PR-01 | `chore/repo-scaffold` | 1.1–1.4 | 4/4 | ✅ ready for PR |
 | PR-02 | `feat/target-core-layers` | 2.1–2.3 | 0/3 | ⬜ todo |
 | PR-03 | `feat/target-http-server` | 2.4–2.6 | 0/3 | ⬜ todo |
 | PR-04 | `feat/agent-data-models` | 4.1–4.2 | 0/2 | ⬜ todo |
@@ -124,7 +124,7 @@ chore: add CI workflow and target purity script stub
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done |
 | **Branch** | `chore/repo-scaffold` |
 | **Requirements** | R11 prep |
 | **Files** | `snapshots/.gitkeep`, `TASK_CHECKLIST.md`, `CODE_STYLE.md`, `CONTEXT.md` |
@@ -133,7 +133,7 @@ chore: add CI workflow and target purity script stub
 **Delivered:**
 
 - `snapshots/.gitkeep` — keeps output dir in repo; `snapshots/*.json` gitignored
-- `TASK_CHECKLIST.md`, `CODE_STYLE.md`, `CONTEXT.md` — committed tracking docs (this update)
+- `TASK_CHECKLIST.md`, `CODE_STYLE.md`, `CONTEXT.md` — committed tracking docs
 - `CODE_STYLE.md` §7 — PR title/description rule (draft after last task in each PR)
 - `notes/IMPLEMENTATION_PLAN.md` §9 — PR-01 draft template (local, gitignored)
 
@@ -141,9 +141,18 @@ chore: add CI workflow and target purity script stub
 
 **Placeholder commit:** `chore: add snapshots dir and project tracking docs`
 
-**Actual commit hash:**
+**Actual commit hash:** `f6688e3`
 
 **Actual commit message:**
+
+```text
+chore: add snapshots dir and project tracking docs
+
+- Add snapshots/.gitkeep (runtime JSON remains gitignored)
+- Add TASK_CHECKLIST.md, CODE_STYLE.md, CONTEXT.md for progress tracking
+- Document PR draft workflow: title + detailed description after last task per PR
+- Update checklist: task 1.2 CI verified green (ci + Dependency Graph)
+```
 
 **Verification:**
 
@@ -151,6 +160,7 @@ chore: add CI workflow and target purity script stub
 snapshots/.gitkeep exists
 .gitignore allows !snapshots/.gitkeep while ignoring snapshots/*.json
 CODE_STYLE.md documents PR draft workflow (§7)
+Pushed to origin/chore/repo-scaffold
 ```
 
 **Notes:**
@@ -161,11 +171,17 @@ CODE_STYLE.md documents PR draft workflow (§7)
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ⬜ todo |
+| **Status** | ✅ done (commit pending) |
 | **Branch** | `chore/repo-scaffold` |
 | **Requirements** | — |
-| **Files** | `agent/__init__.py`, `target/__init__.py`, `tests/conftest.py` |
-| **Done when** | `pytest` collects 0 tests, exit 0 |
+| **Files** | `agent/__init__.py`, `target/__init__.py`, `tests/conftest.py`, `.github/workflows/ci.yml` |
+| **Done when** | `pytest tests/ -q` collects 0 tests, exit 0 |
+
+**Delivered:**
+
+- `agent/__init__.py`, `target/__init__.py` — empty packages with module docstrings
+- `tests/conftest.py` — scaffold hook so 0 tests exits 0 (not pytest code 5)
+- `.github/workflows/ci.yml` — simplified pytest step (no exit-5 workaround)
 
 **Placeholder commit:** `chore: add empty package init files`
 
@@ -175,24 +191,67 @@ CODE_STYLE.md documents PR draft workflow (§7)
 
 **Verification:**
 
+```text
+pytest tests/ -q → no tests ran, exit 0 (Python 3.12.10, pytest 8.4.2)
+```
+
 **Notes:**
 
 ---
 
 **PR-01 merge checklist:**
 
-- [ ] All tasks 1.1–1.4 ✅
+- [x] All tasks 1.1–1.4 ✅
 - [ ] CI green on PR
 - [ ] PR merged to `main`
 
-**Pull request draft** *(fill after task 1.4 — then open PR on GitHub):*
+**Pull request draft** *(copy to GitHub after task 1.4 push):*
 
 | Field | Value |
 |-------|--------|
-| **When** | After task **1.4** is committed and pushed |
+| **When** | Now — after task 1.4 commit + push |
 | **Base ← Compare** | `main` ← `chore/repo-scaffold` |
 | **Title** | `chore: repo scaffold (PR-01)` |
-| **Description** | Full template in `notes/IMPLEMENTATION_PLAN.md` §9 (PR-01). Copy tasks 1.1–1.4 sections into GitHub PR body. |
+
+**Description** (paste into GitHub PR body):
+
+```markdown
+## Summary
+Initial monorepo scaffold: dependencies, CI, tracking docs, empty packages — no calculator or agent logic yet.
+
+## Tasks included
+
+### Task 1.1 — Gitignore and Python dependencies
+- **Files:** `.gitignore`, `requirements.txt`, `requirements-dev.txt`
+- **Behavior:** Stdlib-first runtime deps; pytest 8.x for dev; ignore venv, snapshots JSON, local `notes/`
+- **Verification:** `pip install -r requirements-dev.txt`; Python 3.12.x
+
+### Task 1.2 — CI workflow and purity script stub
+- **Files:** `.github/workflows/ci.yml`, `scripts/check_target_purity.sh`
+- **Behavior:** GitHub Actions on push/PR (Python 3.12, pytest, purity script); stub passes when `target/` absent
+- **Verification:** Actions tab — `ci` workflow green
+
+### Task 1.3 — Snapshots dir and repo hygiene
+- **Files:** `snapshots/.gitkeep`, `TASK_CHECKLIST.md`, `CODE_STYLE.md`, `CONTEXT.md`
+- **Behavior:** Runtime snapshot JSON gitignored; tracking docs committed; design docs stay in gitignored `notes/`
+- **Verification:** `snapshots/` exists; docs in repo root
+
+### Task 1.4 — Package init files
+- **Files:** `agent/__init__.py`, `target/__init__.py`, `tests/conftest.py`
+- **Behavior:** Empty packages for later code; pytest collects 0 tests, exit 0
+- **Verification:** `pytest tests/ -q`
+
+## Requirements touched
+R11 prep (snapshots dir) · R34 prep (scaffold / CI foundation)
+
+## Test plan
+- [ ] `ci` workflow green on this branch
+- [ ] `pytest tests/ -q` — 0 tests, exit 0
+- [ ] `bash scripts/check_target_purity.sh` — stub pass
+
+## Merge notes
+First PR — no merge dependency. After merge, branch `feat/target-core-layers` from updated `main`.
+```
 
 ---
 

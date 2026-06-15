@@ -27,9 +27,7 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Run pytest
-        run: |
-          mkdir -p tests
-          pytest tests/ -q || { code=$?; if [ "$code" -eq 5 ]; then exit 0; fi; exit "$code"; }
+        run: pytest tests/ -q
 
       - name: Check target purity
         run: bash scripts/check_target_purity.sh

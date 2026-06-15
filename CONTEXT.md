@@ -63,6 +63,19 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-15 — Task 1.4 complete (local)
+
+- Added `agent/__init__.py`, `target/__init__.py`, `tests/conftest.py`
+- `pytest tests/ -q` → 0 tests, exit 0 (conftest scaffold hook)
+- Simplified CI pytest step (no exit-5 workaround)
+- PR-01 ready — open PR after commit + push
+- Next: commit 1.4, push, open PR-01 on GitHub
+
+### 2026-06-15 — Task 1.3 committed
+
+- Commit `f6688e3`: snapshots/.gitkeep + tracking docs + PR workflow docs
+- Pushed to `origin/chore/repo-scaffold`
+
 ### 2026-06-15 — Task 1.3 complete (local)
 
 - Added `snapshots/.gitkeep` (runtime JSON still gitignored)
@@ -101,7 +114,7 @@ Append newest entries at the **top**.
 
 `main` exists on GitHub as default branch (same scaffold snapshot for now).
 
-Finish PR-01 on `chore/repo-scaffold` (tasks 1.3–1.4), open PR → merge into `main`.
+Finish PR-01 on `chore/repo-scaffold` — task 1.4 done; open PR → merge into `main`.
 
 ---
 
