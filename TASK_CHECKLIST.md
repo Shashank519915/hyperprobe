@@ -14,8 +14,8 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR | Branch | Tasks | Done | Status |
 |----|--------|-------|------|--------|
 | PR-01 | `chore/repo-scaffold` | 1.1–1.4 | 4/4 | ✅ merged |
-| PR-02 | `feat/target-core-layers` | 2.1–2.3 | 3/3 | ✅ ready for PR |
-| PR-03 | `feat/target-http-server` | 2.4–2.6 | 0/3 | ⬜ todo |
+| PR-02 | `feat/target-core-layers` | 2.1–2.3 | 3/3 | ✅ merged |
+| PR-03 | `feat/target-http-server` | 2.4–2.6 | 1/3 | 🔄 in progress |
 | PR-04 | `feat/agent-data-models` | 4.1–4.2 | 0/2 | ⬜ todo |
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 0/5 | ⬜ todo |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 0/2 | ⬜ todo |
@@ -357,7 +357,7 @@ feat(target): add MathService routing to engines
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done |
 | **Branch** | `feat/target-core-layers` |
 | **Requirements** | R2 |
 | **Files** | `tests/test_target_math.py`, `tests/conftest.py` |
@@ -374,13 +374,23 @@ feat(target): add MathService routing to engines
 ```text
 pytest tests/ -q → 11 passed
 No agent imports in tests/test_target_math.py
+Pushed to origin/feat/target-core-layers
 ```
 
 **Placeholder commit:** `test(target): unit test MathService and engines`
 
-**Actual commit hash:**
+**Actual commit hash:** `086bed6` (merged via PR #2)
 
 **Actual commit message:**
+
+```text
+test(target): unit test MathService and engines
+
+- Add tests/test_target_math.py with 11 cases for engines and MathService
+- Update conftest.py: repo root on sys.path for target imports
+- Remove scaffold exit-5 hook now that tests exist
+- Update TASK_CHECKLIST and CONTEXT: PR-02 ready, PR draft included
+```
 
 **Notes:**
 
@@ -389,8 +399,8 @@ No agent imports in tests/test_target_math.py
 **PR-02 merge checklist:**
 
 - [x] All tasks 2.1–2.3 ✅
-- [ ] CI green on PR
-- [ ] PR merged to `main`
+- [x] CI green on PR
+- [x] PR merged to `main` (PR #2, merge `c387258`)
 
 **Pull request draft** *(copy to GitHub after task 2.3 push):*
 
@@ -441,11 +451,34 @@ Depends on PR-01 merged. After merge, branch `feat/target-http-server` from upda
 
 ### Task 2.4 — RouteHandler
 
-| Status | ⬜ todo | **Files** | `target/handlers.py` | **Req** | R1, R2 |
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/target-http-server` |
+| **Requirements** | R1, R2 |
+| **Files** | `target/handlers.py` |
+| **Done when** | Parses query, calls MathService, returns result dict |
+
+**Delivered:**
+
+- `RouteHandler.handle_calculate(query_string)` → `{"op", "a", "b", "result"}`
+- `RouteHandler.parse_calculate_query` — extracts `op`, `a`, `b`; missing/invalid params → `ValueError`
+- `ValueError` / `ZeroDivisionError` propagate for HTTP mapping in task 2.5
+
+**Verification:**
+
+```text
+RouteHandler().handle_calculate('op=add&a=10&b=20') → result 30.0
+pytest tests/ -q → 11 passed
+```
 
 **Placeholder commit:** `feat(target): add RouteHandler for /calculate`
 
-**Actual commit hash:** · **Actual commit message:** · **Verification:** · **Notes:**
+**Actual commit hash:**
+
+**Actual commit message:**
+
+**Notes:**
 
 ---
 
@@ -468,6 +501,22 @@ Depends on PR-01 merged. After merge, branch `feat/target-http-server` from upda
 **Placeholder commit:** `test(target): HTTP integration test without agent`
 
 **Actual commit hash:** · **Actual commit message:** · **Verification:** · **Notes:**
+
+---
+
+**PR-03 merge checklist:**
+
+- [ ] All tasks 2.4–2.6 ✅
+- [ ] CI green on PR
+- [ ] PR merged to `main`
+
+**Pull request draft** *(fill after task 2.6 — then open PR on GitHub):*
+
+| Field | Value |
+|-------|--------|
+| **When** | After task **2.6** is committed and pushed |
+| **Base ← Compare** | `main` ← `feat/target-http-server` |
+| **Title** | `feat(target): HTTP calculator server (PR-03)` |
 
 ---
 

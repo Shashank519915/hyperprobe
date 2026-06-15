@@ -12,7 +12,7 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 | **GitHub** | https://github.com/Shashank519915/hyperprobe.git |
 | **Structure** | Monorepo — `target/` + `agent/` in one repo |
 | **Default branch** | `main` |
-| **Active branch** | `feat/target-core-layers` (PR-02) |
+| **Active branch** | `feat/target-http-server` (PR-03) |
 | **CI workflows** | `ci` (pytest + purity) · `Dependency Graph` (Dependabot — automatic) |
 
 ---
@@ -34,8 +34,9 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 hyperprobe/
 ├── agent/              # instrumentation (later)
 ├── target/
+│   ├── handlers.py     # layer 1 — RouteHandler (PR-03)
 │   ├── engines/        # layer 3 — add/sub/mul/div engines
-│   └── services/       # layer 2 — MathService (PR-02)
+│   └── services/       # layer 2 — MathService
 ├── tests/
 ├── scripts/
 ├── snapshots/
@@ -64,6 +65,17 @@ hyperprobe/
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 2.4 complete (local)
+
+- Added `target/handlers.py` — `RouteHandler.handle_calculate` (layer 1)
+- Parses `op`, `a`, `b` query params; returns `{op, a, b, result}` dict
+- Next: commit 2.4, then task 2.5 (ThreadingHTTPServer on :8080)
+
+### 2026-06-16 — PR-02 merged
+
+- PR #2 merged to `main` (merge `c387258`); branch `feat/target-http-server` from updated `main`
+- Tasks 2.1–2.3 on `main`: engines, MathService, 11 unit tests
 
 ### 2026-06-16 — Task 2.3 complete (local)
 
@@ -139,7 +151,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-01 merged to `main`. Current work: **PR-02** on `feat/target-core-layers`.
+PR-02 merged to `main`. Current work: **PR-03** on `feat/target-http-server`.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
