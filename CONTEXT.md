@@ -12,7 +12,7 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 | **GitHub** | https://github.com/Shashank519915/hyperprobe.git |
 | **Structure** | Monorepo — `target/` + `agent/` in one repo |
 | **Default branch** | `main` |
-| **Active branch** | `feat/agent-breakpoint-registry` (PR-05) |
+| **Active branch** | `feat/agent-safe-serializer` (PR-06) |
 | **CI workflows** | `ci` (pytest + purity) · `Dependency Graph` (Dependabot — automatic) |
 
 ---
@@ -34,8 +34,9 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 hyperprobe/
 ├── agent/
 │   ├── models.py       # Breakpoint + snapshot models (PR-04)
-│   ├── breakpoints.py  # normalize_path + matchers (PR-05)
-│   └── registry.py     # BreakpointRegistry (PR-05)
+│   ├── breakpoints.py  # normalize_path + matchers + YAML loader
+│   ├── registry.py     # BreakpointRegistry
+│   └── serializer.py   # SafeSerializer (PR-06)
 ├── target/
 │   ├── handlers.py     # layer 1 — RouteHandler
 │   ├── server.py       # ThreadingHTTPServer :8080 (PR-03)
@@ -64,13 +65,25 @@ hyperprobe/
 | 2026-06-15 | Design docs in `notes/` gitignored; submission README holds 1–2 para architecture |
 | 2026-06-15 | Pin runtime to **Python 3.12** (verified locally on 3.12.10) |
 | 2026-06-15 | Ports: target `:8080`, agent control `:9090` |
-| 2026-06-16 | `notes/DEMO_COMMANDS.md` — single gitignored command/setup reference for human README (not implementation notes) |
+| 2026-06-16 | `notes/DEMO_COMMANDS.md` — updated after each merged PR / verified milestone (setup + commands only) |
 
 ---
 
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 7.1 complete (local)
+
+- Added `agent/serializer.py` — SafeSerializer with type fallbacks
+- Added `tests/test_serializer.py` — 7 tests; pytest 45 passed
+- Updated `notes/DEMO_COMMANDS.md` (PR-05/06 test commands)
+- Next: commit 7.1, then task 7.2
+
+### 2026-06-16 — PR-05 merged
+
+- PR #5 merged to `main` (merge `4046196`); branch `feat/agent-safe-serializer`
+- Breakpoint registry + `breakpoints.yaml` on main; CI green
 
 ### 2026-06-16 — Task 5.5 complete (local)
 
@@ -252,7 +265,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-04 merged to `main`. PR-05 complete on `feat/agent-breakpoint-registry` — open PR to merge.
+PR-05 merged to `main`. Current work: **PR-06** on `feat/agent-safe-serializer`.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
