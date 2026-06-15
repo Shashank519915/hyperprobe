@@ -12,7 +12,7 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 | **GitHub** | https://github.com/Shashank519915/hyperprobe.git |
 | **Structure** | Monorepo — `target/` + `agent/` in one repo |
 | **Default branch** | `main` |
-| **Active branch** | `feat/target-http-server` (PR-03) |
+| **Active branch** | `feat/agent-data-models` (PR-04) |
 | **CI workflows** | `ci` (pytest + purity) · `Dependency Graph` (Dependabot — automatic) |
 
 ---
@@ -32,7 +32,8 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 
 ```text
 hyperprobe/
-├── agent/              # instrumentation (later)
+├── agent/
+│   └── models.py       # Breakpoint types (PR-04)
 ├── target/
 │   ├── handlers.py     # layer 1 — RouteHandler
 │   ├── server.py       # ThreadingHTTPServer :8080 (PR-03)
@@ -60,13 +61,33 @@ hyperprobe/
 | 2026-06-15 | Design docs in `notes/` gitignored; submission README holds 1–2 para architecture |
 | 2026-06-15 | Pin runtime to **Python 3.12** (verified locally on 3.12.10) |
 | 2026-06-15 | Ports: target `:8080`, agent control `:9090` |
-| 2026-06-16 | Demo command log in `notes/DEMO_COMMANDS.md` (gitignored) for human README |
+| 2026-06-16 | `notes/DEMO_COMMANDS.md` — single gitignored command/setup reference for human README (not implementation notes) |
 
 ---
 
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 4.2 complete (local)
+
+- Extended `agent/models.py`: TraceEvent, RawFrame, RawCapture, StackFrame, Snapshot
+- PR-04 ready — open PR after commit + push
+
+### 2026-06-16 — Task 4.1 committed
+
+- Commit `f3e0deb`: BreakpointType, CaptureMode, Breakpoint; CI green
+
+### 2026-06-16 — Task 4.1 complete (local)
+
+- Added `agent/models.py` — `BreakpointType`, `CaptureMode`, `Breakpoint` (§5.6)
+- Restructured `notes/DEMO_COMMANDS.md` as setup/command-only reference
+- Next: commit 4.1, then task 4.2 (RawCapture, Snapshot, StackFrame)
+
+### 2026-06-16 — PR-03 merged
+
+- PR #3 merged to `main` (merge `fde52e7`); branch `feat/agent-data-models` from updated `main`
+- Target complete: 18 tests, HTTP :8080, purity script
 
 ### 2026-06-16 — Task 2.6 complete (local)
 
@@ -177,7 +198,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-02 merged to `main`. Current work: **PR-03** on `feat/target-http-server`.
+PR-03 merged to `main`. Current work: **PR-04** on `feat/agent-data-models`.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
