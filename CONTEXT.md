@@ -41,7 +41,7 @@ hyperprobe/
 ├── tests/
 ├── scripts/
 ├── snapshots/
-├── notes/              # gitignored — ARCHITECTURE_V2, IMPLEMENTATION_PLAN
+├── notes/              # gitignored — ARCHITECTURE_V2, IMPLEMENTATION_PLAN, DEMO_COMMANDS.md
 ├── oldnotes/           # gitignored — draft architecture history
 ├── TASK_CHECKLIST.md   # task tracking (committed)
 ├── CODE_STYLE.md
@@ -60,12 +60,26 @@ hyperprobe/
 | 2026-06-15 | Design docs in `notes/` gitignored; submission README holds 1–2 para architecture |
 | 2026-06-15 | Pin runtime to **Python 3.12** (verified locally on 3.12.10) |
 | 2026-06-15 | Ports: target `:8080`, agent control `:9090` |
+| 2026-06-16 | Demo command log in `notes/DEMO_COMMANDS.md` (gitignored) for human README |
 
 ---
 
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 2.6 complete (local)
+
+- Added `tests/test_target_http.py` — 7 HTTP tests; total 18 pytest cases
+- Expanded `scripts/check_target_purity.sh` (trace/logging/agent rules)
+- Added `notes/DEMO_COMMANDS.md` — command/output log for human README
+- PR-03 ready — open PR after commit + push
+
+### 2026-06-16 — Task 2.5 committed + manual curl verified
+
+- Commit `a220208`: ThreadingHTTPServer on :8080; CI green
+- User verified: `python -m target.server` + curl → 200 JSON result 30.0
+- PowerShell note: use `curl.exe` or `-UseBasicParsing` (logged in DEMO_COMMANDS.md)
 
 ### 2026-06-16 — Task 2.5 complete (local)
 
