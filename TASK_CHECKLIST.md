@@ -17,7 +17,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-02 | `feat/target-core-layers` | 2.1–2.3 | 3/3 | ✅ merged |
 | PR-03 | `feat/target-http-server` | 2.4–2.6 | 3/3 | ✅ merged |
 | PR-04 | `feat/agent-data-models` | 4.1–4.2 | 2/2 | ✅ merged |
-| PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 4/5 | 🔄 in progress |
+| PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 5/5 | ✅ ready for PR |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 0/2 | ⬜ todo |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 0/3 | ⬜ todo |
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 0/6 | ⬜ todo |
@@ -898,7 +898,7 @@ feat(agent): add BreakpointRegistry with O(1) indexes
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done |
 | **Branch** | `feat/agent-breakpoint-registry` |
 | **Requirements** | R20 |
 | **Files** | `agent/registry.py`, `tests/test_registry.py` |
@@ -915,9 +915,53 @@ feat(agent): add BreakpointRegistry with O(1) indexes
 ```text
 pytest tests/test_registry.py -q → 8 passed
 pytest tests/ -q → 34 passed
+Pushed to origin/feat/agent-breakpoint-registry; CI green
 ```
 
 **Placeholder commit:** `feat(agent): support multiple BPs per name/line`
+
+**Actual commit hash:** `b7e13d8`
+
+**Actual commit message:**
+
+```text
+feat(agent): support multiple BPs per name/line
+
+- Add get_matching_breakpoint_ids for call and line events
+- Return all bp ids sharing co_name, qualname, or file+line (no deduplication)
+- Add registry tests for multiple BPs on same target (34 total pytest)
+- Update TASK_CHECKLIST and CONTEXT: task 5.3 committed, 5.4 done
+```
+
+**Notes:**
+
+---
+
+### Task 5.5 — breakpoints.yaml seed loader
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-breakpoint-registry` |
+| **Requirements** | R29 |
+| **Files** | `breakpoints.yaml`, `agent/breakpoints.py`, `tests/test_breakpoints_yaml.py`, `requirements.txt` |
+| **Done when** | Loader registers function, method, file_line examples |
+
+**Delivered:**
+
+- `breakpoints.yaml` — seed examples: function `compute`, method `AdditionEngine.add`, file_line `addition.py:5`
+- `breakpoint_from_dict`, `load_breakpoints_yaml` — PyYAML loader into registry
+- `requirements.txt` — `PyYAML>=6.0,<7`
+- `tests/test_breakpoints_yaml.py` — 4 loader tests
+
+**Verification:**
+
+```text
+pytest tests/test_breakpoints_yaml.py -q → 4 passed
+pytest tests/ -q → 38 passed
+```
+
+**Placeholder commit:** `feat(agent): load breakpoints.yaml seed config`
 
 **Actual commit hash:**
 
@@ -927,25 +971,58 @@ pytest tests/ -q → 34 passed
 
 ---
 
-| Task | Status | Files | Req |
-|------|--------|-------|-----|
-| **5.5** breakpoints.yaml | ⬜ | `breakpoints.yaml` | R29 |
-
-_Record commit hash / message / verification per task when done._
-
 **PR-05 merge checklist:**
 
-- [ ] All tasks 5.1–5.5 ✅
+- [x] All tasks 5.1–5.5 ✅
 - [ ] CI green on PR
 - [ ] PR merged to `main`
 
-**Pull request draft** *(fill after task 5.5 — then open PR on GitHub):*
+**Pull request draft** *(copy to GitHub after task 5.5 push):*
 
 | Field | Value |
 |-------|--------|
-| **When** | After task **5.5** is committed and pushed |
+| **When** | Now — after task 5.5 commit + push |
 | **Base ← Compare** | `main` ← `feat/agent-breakpoint-registry` |
 | **Title** | `feat(agent): breakpoint registry (PR-05)` |
+
+**Description** (paste into GitHub PR body):
+
+```markdown
+## Summary
+Breakpoint matching, thread-safe registry with O(1) indexes, multi-BP support, and YAML seed config.
+
+## Tasks included
+
+### Task 5.1 — Path normalization
+- **Files:** `agent/breakpoints.py`, `tests/test_breakpoints.py`
+- **Behavior:** `normalize_path()` via `Path.resolve()`
+
+### Task 5.2 — Matchers
+- **Files:** `agent/breakpoints.py`
+- **Behavior:** function/method/file_line matchers + dispatcher
+
+### Task 5.3 — BreakpointRegistry
+- **Files:** `agent/registry.py`, `tests/test_registry.py`
+- **Behavior:** Thread-safe registry with O(1) indexes
+
+### Task 5.4 — Multiple BPs per target
+- **Files:** `agent/registry.py`
+- **Behavior:** `get_matching_breakpoint_ids` — all ids, no deduplication
+
+### Task 5.5 — YAML seed
+- **Files:** `breakpoints.yaml`, loader in `agent/breakpoints.py`, `requirements.txt`
+- **Behavior:** Load function, method, file_line seed breakpoints at startup
+
+## Requirements touched
+R5–R7 · R20–R22 · R29
+
+## Test plan
+- [ ] `ci` workflow green
+- [ ] `pytest tests/ -q` — 38 passed
+
+## Merge notes
+Depends on PR-04. Enables PR-08 (tracer) and PR-09 (control API).
+```
 
 ---
 

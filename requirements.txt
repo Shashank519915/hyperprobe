@@ -1,3 +1,2 @@
 # Runtime dependencies for HyperProbe PoC target + agent.
-# Intentionally minimal — stdlib-first per ARCHITECTURE_V2.
-# Add PyYAML here when breakpoints.yaml loader is implemented (PR-05).
+PyYAML>=6.0,<7

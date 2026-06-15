@@ -46,6 +46,7 @@ hyperprobe/
 ├── snapshots/
 ├── notes/              # gitignored — ARCHITECTURE_V2, IMPLEMENTATION_PLAN, DEMO_COMMANDS.md
 ├── oldnotes/           # gitignored — draft architecture history
+├── breakpoints.yaml    # seed breakpoint config (PR-05)
 ├── TASK_CHECKLIST.md   # task tracking (committed)
 ├── CODE_STYLE.md
 ├── CONTEXT.md          # this file
@@ -70,6 +71,16 @@ hyperprobe/
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 5.5 complete (local)
+
+- Added `breakpoints.yaml` + `load_breakpoints_yaml` / `breakpoint_from_dict`
+- Added PyYAML to `requirements.txt`; 38 pytest total
+- PR-05 ready — open PR after commit + push
+
+### 2026-06-16 — Task 5.4 committed
+
+- Commit `b7e13d8`: multiple BPs per target; CI green
 
 ### 2026-06-16 — Task 5.4 complete (local)
 
@@ -241,7 +252,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-04 merged to `main`. Current work: **PR-05** on `feat/agent-breakpoint-registry`.
+PR-04 merged to `main`. PR-05 complete on `feat/agent-breakpoint-registry` — open PR to merge.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
