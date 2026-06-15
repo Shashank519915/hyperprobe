@@ -34,7 +34,8 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 hyperprobe/
 ├── agent/
 │   ├── models.py       # Breakpoint + snapshot models (PR-04)
-│   └── breakpoints.py  # normalize_path (PR-05)
+│   ├── breakpoints.py  # normalize_path + matchers (PR-05)
+│   └── registry.py     # BreakpointRegistry (PR-05)
 ├── target/
 │   ├── handlers.py     # layer 1 — RouteHandler
 │   ├── server.py       # ThreadingHTTPServer :8080 (PR-03)
@@ -69,6 +70,16 @@ hyperprobe/
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 5.3 complete (local)
+
+- Added `agent/registry.py` — thread-safe BreakpointRegistry with O(1) indexes
+- Added `tests/test_registry.py` — 5 tests; pytest 31 passed
+- Next: commit 5.3, then task 5.4 (multiple BPs same target)
+
+### 2026-06-16 — Task 5.2 committed
+
+- Commit `1852668`: breakpoint matchers; CI green
 
 ### 2026-06-16 — Task 5.2 complete (local)
 

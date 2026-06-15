@@ -17,7 +17,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-02 | `feat/target-core-layers` | 2.1–2.3 | 3/3 | ✅ merged |
 | PR-03 | `feat/target-http-server` | 2.4–2.6 | 3/3 | ✅ merged |
 | PR-04 | `feat/agent-data-models` | 4.1–4.2 | 2/2 | ✅ merged |
-| PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 2/5 | 🔄 in progress |
+| PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 3/5 | 🔄 in progress |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 0/2 | ⬜ todo |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 0/3 | ⬜ todo |
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 0/6 | ⬜ todo |
@@ -810,7 +810,7 @@ feat(agent): add path normalization helper
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done |
 | **Branch** | `feat/agent-breakpoint-registry` |
 | **Requirements** | R5, R6, R7 |
 | **Files** | `agent/breakpoints.py`, `tests/test_breakpoints.py` |
@@ -828,9 +828,53 @@ feat(agent): add path normalization helper
 ```text
 pytest tests/test_breakpoints.py -q → 8 passed
 pytest tests/ -q → 26 passed
+Pushed to origin/feat/agent-breakpoint-registry; CI green
 ```
 
 **Placeholder commit:** `feat(agent): add breakpoint matchers`
+
+**Actual commit hash:** `1852668`
+
+**Actual commit message:**
+
+```text
+feat(agent): add breakpoint matchers
+
+- Add function/method/file_line matchers and matches_breakpoint dispatcher
+- function: co_name on call; method: exact co_qualname; file_line: normalized path + line
+- Extend tests/test_breakpoints.py with 4 matcher tests (26 total pytest)
+- Update TASK_CHECKLIST and CONTEXT: task 5.1 committed, 5.2 done
+```
+
+**Notes:**
+
+---
+
+### Task 5.3 — BreakpointRegistry indexes
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-breakpoint-registry` |
+| **Requirements** | R21 |
+| **Files** | `agent/registry.py`, `tests/test_registry.py` |
+| **Done when** | O(1) indexes per §5.6; thread-safe register |
+
+**Delivered:**
+
+- `BreakpointRegistry` — `threading.RLock`, `register`, `get`, `list_all`
+- Indexes: `function_names`, `method_qualnames`, `watched_files`, `*_bps_by_*` dicts
+- Lookup helpers: `get_function/method/line_breakpoint_ids`, `has_any_function_or_method_bp`
+- Upsert by `id` rebuilds indexes on each register
+
+**Verification:**
+
+```text
+pytest tests/test_registry.py -q → 5 passed
+pytest tests/ -q → 31 passed
+```
+
+**Placeholder commit:** `feat(agent): add BreakpointRegistry with O(1) indexes`
 
 **Actual commit hash:**
 
@@ -842,8 +886,7 @@ pytest tests/ -q → 26 passed
 
 | Task | Status | Files | Req |
 |------|--------|-------|-----|
-| **5.3** registry indexes | ⬜ | `agent/registry.py`, `tests/test_registry.py` | R21 |
-| **5.4** multiple BPs | ⬜ | `agent/registry.py` | R20 |
+| **5.4** multiple BPs | ⬜ | `agent/registry.py`, `tests/test_registry.py` | R20 |
 | **5.5** breakpoints.yaml | ⬜ | `breakpoints.yaml` | R29 |
 
 _Record commit hash / message / verification per task when done._
