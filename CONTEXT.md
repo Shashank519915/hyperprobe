@@ -37,7 +37,8 @@ hyperprobe/
 │   ├── breakpoints.py  # normalize_path + matchers + YAML loader
 │   ├── registry.py     # BreakpointRegistry
 │   ├── serializer.py   # SafeSerializer (PR-06)
-│   └── capture.py      # sync RawCapture from live frames (PR-07)
+│   ├── capture.py      # sync RawCapture from live frames (PR-07)
+│   └── worker.py       # SnapshotWorker + JSON write (PR-07)
 ├── target/
 │   ├── handlers.py     # layer 1 — RouteHandler
 │   ├── server.py       # ThreadingHTTPServer :8080 (PR-03)
@@ -73,6 +74,16 @@ hyperprobe/
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 6.2 complete (local)
+
+- Added `agent/worker.py` — `build_snapshot`, `SnapshotWorker`, JSON write to `snapshots/`
+- Added `tests/test_worker.py` — 7 tests; pytest 68 passed
+- Next: commit 6.2, then task 6.3 (bounded queue overflow)
+
+### 2026-06-16 — Task 6.1 committed + pushed
+
+- Commit `37e7b41` on `feat/agent-capture-worker`; CI green
 
 ### 2026-06-16 — Task 6.1 complete (local)
 
@@ -292,7 +303,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-06 merged to `main`. **PR-07** on `feat/agent-capture-worker` — task 6.1 done locally.
+PR-06 merged to `main`. **PR-07** on `feat/agent-capture-worker` — tasks 6.1 ✅, 6.2 done locally.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 

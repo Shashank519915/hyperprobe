@@ -19,7 +19,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-04 | `feat/agent-data-models` | 4.1–4.2 | 2/2 | ✅ merged |
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 5/5 | ✅ merged |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 2/2 | ✅ merged |
-| PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 1/3 | 🔄 in progress |
+| PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 2/3 | 🔄 in progress |
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 0/6 | ⬜ todo |
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 0/3 | ⬜ todo |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | ⬜ todo |
@@ -1169,7 +1169,7 @@ Defensive JSON-oriented serialization for captured locals — type fallbacks, de
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `37e7b41`, CI green) |
 | **Branch** | `feat/agent-capture-worker` |
 | **Requirements** | R8, R9, R19 |
 | **Files** | `agent/capture.py`, `tests/test_capture.py` |
@@ -1190,6 +1190,48 @@ pytest tests/ -q → 61 passed
 
 **Placeholder commit:** `feat(agent): add synchronous RawCapture from live frames`
 
+**Actual commit hash:** `37e7b41`
+
+**Actual commit message:**
+
+```text
+feat(agent): add synchronous RawCapture from live frames
+- Add capture_stack_frames and capture_raw in agent/capture.py
+- Walk f_back chain with shallow dict(f_locals) and normalized paths
+- Capture return_value on RETURN events; immutable RawCapture only (R8, R9, R19)
+- Add tests/test_capture.py with 8 cases (61 total pytest)
+- Update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 6.2 — SnapshotWorker
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-capture-worker` |
+| **Requirements** | R11, R12 |
+| **Files** | `agent/worker.py`, `tests/test_worker.py` |
+| **Done when** | Build Snapshot from RawCapture, serialize locals, write JSON; worker thread |
+
+**Delivered:**
+
+- `build_snapshot()` / `snapshot_to_dict()` — registry lookup, SafeSerializer on locals + return value
+- `SnapshotWorker` — background thread, `sys.settrace(None)` + `threading.settrace(None)` on start
+- Writes `snapshots/{snapshot_id}.json`; optional stdout via `EMIT_STDOUT` env
+
+**Verification:**
+
+```text
+pytest tests/test_worker.py -q → 7 passed
+pytest tests/ -q → 68 passed
+```
+
+**Placeholder commit:** `feat(agent): add SnapshotWorker background thread`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -1201,7 +1243,7 @@ pytest tests/ -q → 61 passed
 | Task | Status | Files | Req |
 |------|--------|-------|-----|
 | **6.1** sync RawCapture | ✅ | `agent/capture.py` | R8, R9, R19 |
-| **6.2** SnapshotWorker | ⬜ | `agent/worker.py` | R11, R12 |
+| **6.2** SnapshotWorker | ✅ | `agent/worker.py` | R11, R12 |
 | **6.3** queue overflow | ⬜ | `agent/worker.py` | R23 |
 
 ---
