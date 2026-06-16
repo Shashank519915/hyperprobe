@@ -12,7 +12,7 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 | **GitHub** | https://github.com/Shashank519915/hyperprobe.git |
 | **Structure** | Monorepo — `target/` + `agent/` in one repo |
 | **Default branch** | `main` |
-| **Active branch** | `feat/agent-tracer` (PR-08) |
+| **Active branch** | `feat/agent-control-api` (PR-09) |
 | **CI workflows** | `ci` (pytest + purity) · `Dependency Graph` (Dependabot — automatic) |
 
 ---
@@ -41,7 +41,7 @@ hyperprobe/
 │   ├── worker.py       # SnapshotWorker + JSON write (PR-07)
 │   ├── installer.py    # sys.settrace + threading.settrace (PR-08)
 │   ├── tracer.py       # global_trace + local trace tiers (PR-08)
-│   └── control_server.py  # control server stub, tracing disabled (PR-08/09)
+│   └── control_server.py  # control API :9090 (PR-09)
 ├── target/
 │   ├── handlers.py     # layer 1 — RouteHandler
 │   ├── server.py       # ThreadingHTTPServer :8080 (PR-03)
@@ -78,7 +78,18 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
-### 2026-06-16 — Task 8.6 complete (local)
+### 2026-06-16 — Task 9.1 complete (local)
+
+- Expanded `agent/control_server.py` — ThreadingHTTPServer on :9090, registry wired
+- Added `tests/test_control_server.py` — 5 tests; pytest 109 passed
+- Next: commit 9.1, then task 9.2 (POST/GET /breakpoints)
+
+### 2026-06-16 — PR-08 merged
+
+- PR #8 merged to `main` (merge `9c0f4b8`); CI green
+- Tracer + control server stub on main; branch `feat/agent-control-api` for PR-09
+
+### 2026-06-16 — Task 8.6 committed + pushed
 
 - Added `disable_tracing_on_current_thread()`; wired in worker + `AgentControlServer` stub
 - Added `tests/test_agent_thread_isolation.py` — 4 tests; pytest 104 passed
@@ -383,7 +394,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-07 merged to `main`. **PR-08** on `feat/agent-tracer` — all tasks 8.1–8.6 done locally; open PR after 8.6 commit + push.
+PR-08 merged to `main`. **PR-09** on `feat/agent-control-api` — task 9.1 done locally.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 

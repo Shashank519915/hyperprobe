@@ -123,7 +123,8 @@ def test_control_server_thread_disables_tracing():
 
     sys.settrace = record_sys  # type: ignore[method-assign]
     threading.settrace = record_thread  # type: ignore[method-assign]
-    server = AgentControlServer(host="127.0.0.1", port=0)
+    registry = BreakpointRegistry()
+    server = AgentControlServer(registry, host="127.0.0.1", port=0)
     try:
         server.start()
         deadline = time.time() + 2.0
@@ -150,7 +151,7 @@ def test_control_server_serves_without_self_snapshots(tmp_path):
     )
     capture_queue = create_capture_queue(maxsize=100)
     tracer = Tracer(registry, capture_queue)
-    server = AgentControlServer(host="127.0.0.1", port=0)
+    server = AgentControlServer(registry, host="127.0.0.1", port=0)
     installer = install_trace(tracer.global_trace)
     server.start()
     try:

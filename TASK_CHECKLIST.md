@@ -20,8 +20,8 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 5/5 | ✅ merged |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 2/2 | ✅ merged |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 3/3 | ✅ merged |
-| PR-08 | `feat/agent-tracer` | 8.1–8.6 | 6/6 | ✅ ready for PR |
-| PR-09 | `feat/agent-control-api` | 9.1–9.3 | 0/3 | ⬜ todo |
+| PR-08 | `feat/agent-tracer` | 8.1–8.6 | 6/6 | ✅ merged |
+| PR-09 | `feat/agent-control-api` | 9.1–9.3 | 1/3 | 🔄 in progress |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | ⬜ todo |
 | PR-11 | `feat/docker` | 11.1–11.3 | 0/3 | ⬜ todo |
 | PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 0/6 | ⬜ todo |
@@ -1597,14 +1597,14 @@ pytest tests/ -q → 104 passed
 **PR-08 merge checklist:**
 
 - [x] All tasks 8.1–8.6 ✅
-- [ ] CI green on PR
-- [ ] PR merged to `main`
+- [x] CI green on PR
+- [x] PR merged to `main` (PR #8, merge `9c0f4b8`)
 
-**Pull request draft** *(copy to GitHub after task 8.6 push):*
+**Pull request draft** *(merged — PR #8, `9c0f4b8`):*
 
 | Field | Value |
 |-------|--------|
-| **When** | Now — after task 8.6 commit + push |
+| **When** | Merged — PR #8 (`9c0f4b8`) |
 | **Base ← Compare** | `main` ← `feat/agent-tracer` |
 | **Title** | `feat(agent): two-tier tracer (PR-08)` |
 
@@ -1641,16 +1641,51 @@ Core sys.settrace instrumentation — two-tier global/local trace, capture pipel
 - **Behavior:** `disable_tracing_on_current_thread()` on agent threads
 
 ## Test plan
-- [ ] `pytest tests/test_installer.py tests/test_tracer_global.py tests/test_capture_lifetime.py tests/test_tracer_tiers.py tests/test_tracer_combined.py tests/test_agent_thread_isolation.py -q` → 30 passed
-- [ ] `pytest tests/ -q` → 104 passed
-- [ ] CI green
+- [x] `pytest tests/test_installer.py tests/test_tracer_global.py tests/test_capture_lifetime.py tests/test_tracer_tiers.py tests/test_tracer_combined.py tests/test_agent_thread_isolation.py -q` → 30 passed
+- [x] `pytest tests/ -q` → 104 passed
+- [x] CI green
 ```
+
+---
 
 ## PR-09 — `feat/agent-control-api`
 
+### Task 9.1 — Control HTTP server :9090
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-control-api` |
+| **Requirements** | R25 (prep) |
+| **Files** | `agent/control_server.py`, `tests/test_control_server.py` |
+| **Done when** | Stdlib server on :9090, registry wired, separate from target :8080 |
+
+**Delivered:**
+
+- `AgentControlServer` — `ThreadingHTTPServer` on `0.0.0.0:9090` (configurable)
+- Registry injected via `_ControlHTTPServer`; `/breakpoints` route stub (`501` until 9.2)
+- Unknown routes → `404`; agent thread tracing disabled on start
+
+**Verification:**
+
+```text
+pytest tests/test_control_server.py -q → 5 passed
+pytest tests/ -q → 109 passed
+```
+
+**Placeholder commit:** `feat(agent): add control HTTP server on :9090`
+
+**Actual commit hash:**
+
+**Actual commit message:**
+
+**Notes:**
+
+---
+
 | Task | Status | Files | Req |
 |------|--------|-------|-----|
-| **9.1** control server :9090 | ⬜ | `agent/control_server.py` | R25 |
+| **9.1** control server :9090 | ✅ | `agent/control_server.py` | R25 |
 | **9.2** POST/GET + validation | ⬜ | `agent/control_server.py` | R25–R28 |
 | **9.3** dynamic registration test | ⬜ | `tests/test_control_api.py` | R25 |
 
