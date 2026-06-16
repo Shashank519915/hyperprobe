@@ -20,7 +20,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 5/5 | ✅ merged |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 2/2 | ✅ merged |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 3/3 | ✅ merged |
-| PR-08 | `feat/agent-tracer` | 8.1–8.6 | 4/6 | 🔄 in progress |
+| PR-08 | `feat/agent-tracer` | 8.1–8.6 | 5/6 | 🔄 in progress |
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 0/3 | ⬜ todo |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | ⬜ todo |
 | PR-11 | `feat/docker` | 11.1–11.3 | 0/3 | ⬜ todo |
@@ -1472,7 +1472,7 @@ feat(agent): add local_trace_for_function_breakpoint RETURN capture
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `afeba41`, CI green) |
 | **Branch** | `feat/agent-tracer` |
 | **Requirements** | R7, R17, R22 |
 | **Files** | `agent/tracer.py`, `tests/test_tracer_tiers.py` |
@@ -1494,6 +1494,47 @@ pytest tests/ -q → 97 passed
 
 **Placeholder commit:** `feat(agent): add local_trace_for_file_line_breakpoint`
 
+**Actual commit hash:** `afeba41`
+
+**Actual commit message:**
+
+```text
+feat(agent): add local_trace_for_file_line_breakpoint
+- Install file-line local trace on call into watched_files (§5.3)
+- Capture ENTRY/BOTH on line; RETURN/BOTH on return at matching file+line
+- Add tests/test_tracer_tiers.py with 5 tier isolation cases (97 total pytest)
+- Update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 8.5 — Combined local trace
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-tracer` |
+| **Requirements** | R18 |
+| **Files** | `agent/tracer.py`, `tests/test_tracer_combined.py` |
+| **Done when** | Single local trace dispatches function RETURN/BOTH + file_line on overlap |
+
+**Delivered:**
+
+- `local_trace_combined` — one callback when RETURN/BOTH method BP + watched file overlap (§5.3 step 5)
+- Dispatches `'line'` → file_line; `'return'` → function + file_line captures
+- `tests/test_tracer_combined.py` — BOTH+ENTRY, RETURN+RETURN, RETURN+ENTRY on `AdditionEngine.add`
+
+**Verification:**
+
+```text
+pytest tests/test_tracer_combined.py -q → 3 passed
+pytest tests/ -q → 100 passed
+```
+
+**Placeholder commit:** `feat(agent): add combined local trace dispatcher`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -1508,7 +1549,7 @@ pytest tests/ -q → 97 passed
 | **8.2** global_trace | ✅ | `agent/tracer.py` | R4, R8, R13 |
 | **8.3** local_trace function | ✅ | `agent/tracer.py` | R16, R19 |
 | **8.4** local_trace file_line | ✅ | `agent/tracer.py` | R7, R17 |
-| **8.5** combined local trace | ⬜ | `agent/tracer.py` | R18 |
+| **8.5** combined local trace | ✅ | `agent/tracer.py` | R18 |
 | **8.6** agent thread isolation | ⬜ | worker, control_server | R24 |
 
 ---

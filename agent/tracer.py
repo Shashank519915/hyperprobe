@@ -44,6 +44,39 @@ class Tracer:
             print(f"global_trace error: {exc}", file=sys.stderr)
             return None
 
+    def local_trace_combined(
+        self,
+        frame: types.FrameType,
+        event: str,
+        arg: Any,
+    ) -> TraceFunction | None:
+        """Dispatch function RETURN/BOTH and file_line local trace on one frame (§5.3 step 5)."""
+        try:
+            if event == TraceEvent.LINE.value:
+                self._capture_file_line_hits(frame, TraceEvent.LINE)
+                return self.local_trace_combined
+
+            if event == TraceEvent.RETURN.value:
+                bp_ids = self._frame_return_bps.pop(id(frame), [])
+                for bp_id in bp_ids:
+                    self._enqueue(
+                        frame,
+                        bp_id,
+                        TraceEvent.RETURN,
+                        return_value=arg,
+                    )
+                self._capture_file_line_hits(
+                    frame,
+                    TraceEvent.RETURN,
+                    return_value=arg,
+                )
+                return None
+
+            return self.local_trace_combined
+        except BaseException as exc:
+            print(f"combined local_trace error: {exc}", file=sys.stderr)
+            return None
+
     def local_trace_for_function_breakpoint(
         self,
         frame: types.FrameType,
@@ -155,6 +188,8 @@ class Tracer:
             return_bps = self._return_breakpoint_ids(bp_ids)
             if return_bps:
                 self._frame_return_bps[id(frame)] = return_bps
+            if path in self._registry.watched_files():
+                return self.local_trace_combined
             return self.local_trace_for_function_breakpoint
 
         if path in self._registry.watched_files():

@@ -77,6 +77,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 8.5 complete (local)
+
+- Added `local_trace_combined` dispatcher when method RETURN/BOTH overlaps watched file (§5.3 step 5)
+- Added `tests/test_tracer_combined.py` — 3 tests; pytest 100 passed
+- Next: commit 8.5, then task 8.6 (agent thread isolation)
+
+### 2026-06-16 — Task 8.4 committed + pushed
+
+- Commit `afeba41` on `feat/agent-tracer`; CI green
+
 ### 2026-06-16 — Task 8.4 complete (local)
 
 - Added `local_trace_for_file_line_breakpoint` + `_capture_file_line_hits` (§5.3)
@@ -362,7 +372,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-07 merged to `main`. **PR-08** on `feat/agent-tracer` — tasks 8.1–8.4 done locally (8.4 commit pending).
+PR-07 merged to `main`. **PR-08** on `feat/agent-tracer` — tasks 8.1–8.5 done locally (8.5 commit pending).
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
