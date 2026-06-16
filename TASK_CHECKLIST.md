@@ -21,7 +21,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 2/2 | ✅ merged |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 3/3 | ✅ merged |
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 6/6 | ✅ merged |
-| PR-09 | `feat/agent-control-api` | 9.1–9.3 | 2/3 | 🔄 in progress |
+| PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ ready for PR |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | ⬜ todo |
 | PR-11 | `feat/docker` | 11.1–11.3 | 0/3 | ⬜ todo |
 | PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 0/6 | ⬜ todo |
@@ -1695,7 +1695,7 @@ feat(agent): add control HTTP server on :9090
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `33a3718`, CI green) |
 | **Branch** | `feat/agent-control-api` |
 | **Requirements** | R25–R28 |
 | **Files** | `agent/control_server.py`, `agent/breakpoints.py`, `tests/test_control_server.py` |
@@ -1717,6 +1717,53 @@ pytest tests/ -q → 116 passed
 
 **Placeholder commit:** `feat(agent): implement POST and GET /breakpoints`
 
+**Actual commit hash:** `33a3718`
+
+**Actual commit message:**
+
+```text
+feat(agent): implement POST and GET /breakpoints
+- GET /breakpoints returns 200 JSON list; POST registers/upserts with 201
+- Validate required fields, type, capture_mode, malformed JSON (400)
+- Add breakpoint_to_dict; extend tests/test_control_server.py (116 total pytest)
+- Update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 9.3 — Dynamic registration integration test
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-control-api` |
+| **Requirements** | R25 |
+| **Files** | `tests/test_control_api.py` |
+| **Done when** | No BP → no snapshot → POST → same call → snapshot (§5.13) |
+
+**Delivered:**
+
+- `tests/test_control_api.py` — end-to-end: empty registry + tracer + worker + control server
+- First `AdditionEngine.add` call produces no snapshot; `POST /breakpoints` at runtime; second call writes JSON snapshot
+- Proves registry updates visible to tracer without restart (R25 demo path)
+
+**Design notes** *(for README / review):*
+
+- Integration test runs a live `SnapshotWorker` (not queue-only) to mirror production wiring
+- **Assert on snapshot JSON files**, not raw queue drain — worker consumes `RawCapture` items immediately; draining the queue after capture would falsely show zero items even when tracing worked
+- Before POST: assert no files + empty queue; after POST: `capture_queue.join()` then assert one `*.json` on disk
+
+**Verification:**
+
+```text
+pytest tests/test_control_api.py -q → 1 passed
+pytest tests/ -q → 117 passed
+```
+
+**Placeholder commit:** `test(agent): dynamic breakpoint registration via control API`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -1729,7 +1776,47 @@ pytest tests/ -q → 116 passed
 |------|--------|-------|-----|
 | **9.1** control server :9090 | ✅ | `agent/control_server.py` | R25 |
 | **9.2** POST/GET + validation | ✅ | `agent/control_server.py` | R25–R28 |
-| **9.3** dynamic registration test | ⬜ | `tests/test_control_api.py` | R25 |
+| **9.3** dynamic registration test | ✅ | `tests/test_control_api.py` | R25 |
+
+**PR-09 merge checklist:**
+
+- [x] All tasks 9.1–9.3 ✅
+- [ ] CI green on PR
+- [ ] PR merged to `main`
+
+**Pull request draft** *(open after task 9.3 commit + push):*
+
+| Field | Value |
+|-------|--------|
+| **When** | After 9.3 pushed |
+| **Base ← Compare** | `main` ← `feat/agent-control-api` |
+| **Title** | `feat(agent): control API for runtime breakpoints (PR-09)` |
+
+**Description** (paste into GitHub PR body):
+
+```markdown
+## Summary
+Agent control HTTP API on `:9090` — list and register breakpoints at runtime without restart (R25–R28).
+
+## Tasks included
+
+### Task 9.1 — Control HTTP server :9090
+- **Files:** `agent/control_server.py`, `tests/test_control_server.py`
+- **Behavior:** `ThreadingHTTPServer` on `0.0.0.0:9090`; registry wired; agent thread tracing disabled
+
+### Task 9.2 — POST/GET /breakpoints + validation
+- **Files:** `agent/control_server.py`, `agent/breakpoints.py`, `tests/test_control_server.py`
+- **Behavior:** `GET /breakpoints` → 200 list; `POST /breakpoints` → 201 upsert; validation → 400
+
+### Task 9.3 — Dynamic registration integration test
+- **Files:** `tests/test_control_api.py`
+- **Behavior:** No matching BP → no snapshot → `POST /breakpoints` → same call → snapshot JSON (R25)
+
+## Test plan
+- [x] `pytest tests/test_control_server.py tests/test_control_api.py -q` → 13 passed
+- [x] `pytest tests/ -q` → 117 passed
+- [ ] CI green
+```
 
 ---
 

@@ -70,13 +70,25 @@ hyperprobe/
 | 2026-06-15 | Design docs in `notes/` gitignored; submission README holds 1–2 para architecture |
 | 2026-06-15 | Pin runtime to **Python 3.12** (verified locally on 3.12.10) |
 | 2026-06-15 | Ports: target `:8080`, agent control `:9090` |
-| 2026-06-16 | `notes/DEMO_COMMANDS.md` — updated after each merged PR / verified milestone (setup + commands only) |
+| 2026-06-16 | Task completion notes include **design choices / tradeoffs** (for README later) |
+| 2026-06-16 | Commit command format: explicit `git add` paths + multi `-m` body (not heredoc) |
 
 ---
 
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 9.3 complete (local)
+
+- Added `tests/test_control_api.py` — dynamic registration integration test (R25, §5.13)
+- Flow: no BP → no snapshot → `POST /breakpoints` → `AdditionEngine.add` → snapshot JSON
+- **Choice:** assert snapshot files (not queue drain) — `SnapshotWorker` consumes queue items immediately
+- pytest 117 passed; PR-09 ready for commit + PR
+
+### 2026-06-16 — Task 9.2 committed + pushed
+
+- Commit `33a3718` on `feat/agent-control-api`; CI green
 
 ### 2026-06-16 — Task 9.2 complete (local)
 
@@ -404,7 +416,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-08 merged to `main`. **PR-09** on `feat/agent-control-api` — tasks 9.1 ✅, 9.2 done locally.
+PR-08 merged to `main`. **PR-09** on `feat/agent-control-api` — tasks 9.1 ✅, 9.2 ✅ (`33a3718`), 9.3 done locally (ready for commit + PR).
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
