@@ -29,6 +29,10 @@ class _ControlHTTPServer(ThreadingHTTPServer):
         super().__init__(server_address, request_handler_class)
         self.daemon_threads = True
 
+    def process_request_thread(self, request, client_address) -> None:  # noqa: ANN001
+        disable_tracing_on_current_thread()
+        super().process_request_thread(request, client_address)
+
 
 class _ControlHandler(BaseHTTPRequestHandler):
     server: _ControlHTTPServer

@@ -20,7 +20,7 @@ def _drain_queue(capture_queue: queue.Queue) -> list:
     return items
 
 
-def test_disable_tracing_on_current_thread_clears_hooks():
+def test_disable_tracing_on_current_thread_clears_sys_trace_only():
     seen: dict[str, object | None] = {}
 
     original_sys = __import__("sys").settrace
@@ -51,7 +51,26 @@ def test_disable_tracing_on_current_thread_clears_hooks():
         threading.settrace = original_thread  # type: ignore[method-assign]
 
     assert seen.get("sys") is None
-    assert seen.get("threading") is None
+    assert "threading" not in seen
+
+
+def test_agent_thread_disable_does_not_clear_global_threading_trace():
+    def tracer(frame, event, arg):
+        return tracer
+
+    installer = install_trace(tracer)
+    try:
+
+        def agent_thread_entry() -> None:
+            disable_tracing_on_current_thread()
+
+        thread = threading.Thread(target=agent_thread_entry, name="agent-thread")
+        thread.start()
+        thread.join()
+
+        assert threading.gettrace() is tracer
+    finally:
+        remove_trace(installer)
 
 
 def test_worker_thread_does_not_emit_agent_self_snapshots(tmp_path):
