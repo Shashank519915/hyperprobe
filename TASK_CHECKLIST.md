@@ -23,7 +23,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 6/6 | ✅ merged |
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ merged |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 2/2 | ✅ merged |
-| PR-11 | `feat/docker` | 11.1–11.3 | 0/3 | 🔄 in progress |
+| PR-11 | `feat/docker` | 11.1–11.3 | 2/3 | 🔄 in progress |
 | PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 0/6 | ⬜ todo |
 | PR-13 | `chore/ci-hardening` | 12.2–12.3 | 0/2 | ⬜ todo |
 | PR-14 | `docs/readme` | 14.1 | 0/1 | ⬜ todo |
@@ -1961,7 +1961,7 @@ Single process entrypoint — `python -m agent.bootstrap` wires agent + calculat
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `c365aeb`, pushed to `origin/feat/docker`) |
 | **Branch** | `feat/docker` |
 | **Requirements** | R32 (partial — image build; compose in 11.2) |
 | **Files** | `Dockerfile`, `.dockerignore` |
@@ -2001,9 +2001,61 @@ docker run --rm -p 8080:8080 -p 9090:9090 hyperprobe-poc:local
 pytest tests/ -q → 120 passed (unchanged — no new tests in 11.1)
 ```
 
-**Note:** Docker CLI not available in agent dev shell — verify `docker build` locally or wait for PR-13 CI docker job.
+**Note:** Verified locally — `docker build` + manual `docker run` smoke (calculate 200, breakpoints JSON). Branch recreated cleanly from `main` via cherry-pick after accidental commit on `feat/agent-bootstrap`.
 
 **Placeholder commit:** `feat(docker): add Dockerfile with python 3.12-slim`
+
+**Actual commit hash:** `c365aeb`
+
+**Actual commit message:**
+
+```text
+feat(docker): add Dockerfile with python 3.12-slim
+- Dockerfile: python:3.12-slim, ENTRYPOINT agent.bootstrap, EXPOSE 8080+9090
+- .dockerignore: exclude venv, tests, dev deps, notes (runtime-only image)
+- Update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS with Docker README insights (PR-11)
+```
+
+**Notes:** Pushed on `feat/docker`; one PR for tasks 11.1–11.3.
+
+---
+
+### Task 11.2 — docker-compose
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/docker` |
+| **Requirements** | R32, R12 (`EMIT_STDOUT`) |
+| **Files** | `docker-compose.yml` |
+| **Done when** | `docker compose up --build` starts service; snapshot volume + stdout env |
+
+**Delivered:**
+
+- `docker-compose.yml` — service `hyperprobe-poc`, `build: .`, ports `8080`/`9090`
+- Volume `./snapshots:/app/snapshots` — snapshots persist on host (R11)
+- `EMIT_STDOUT=1` — worker prints snapshot JSON to container logs (R12)
+
+**Design notes** *(for README / review):*
+
+| Topic | Detail |
+|-------|--------|
+| **Why compose over raw `docker run`** | One command for reviewers (R32); encodes ports, volume, env so demo is reproducible without remembering flags |
+| **Snapshot bind mount** | Container writes to `/app/snapshots/` → appears in repo `./snapshots/` on host; inspect with `dir snapshots\` without `docker exec` |
+| **`EMIT_STDOUT=1`** | Read by `SnapshotWorker` at runtime; each snapshot also printed to `docker compose logs` — useful when volume mount is misconfigured |
+| **No compose override file** | Single service PoC; keep minimal until multi-env needed |
+| **Build + run together** | `docker compose up --build` rebuilds image when Dockerfile/context changes |
+
+**Verification:**
+
+```text
+docker compose config   # validates YAML
+docker compose up --build
+# curl calculate + breakpoints; dir snapshots\ after request
+pytest tests/ -q → 120 passed
+```
+
+**Placeholder commit:** `feat(docker): add docker-compose with snapshot volume`
 
 **Actual commit hash:**
 
@@ -2016,7 +2068,7 @@ pytest tests/ -q → 120 passed (unchanged — no new tests in 11.1)
 | Task | Status | Files | Req |
 |------|--------|-------|-----|
 | **11.1** Dockerfile | ✅ | `Dockerfile`, `.dockerignore` | R32 |
-| **11.2** docker-compose | ⬜ | `docker-compose.yml` | R32 |
+| **11.2** docker-compose | ✅ | `docker-compose.yml` | R32 |
 | **11.3** demo verified | ⬜ | PR description | R32 |
 
 ---

@@ -1,0 +1,11 @@
+# HyperProbe PoC — one-command demo (ARCHITECTURE_V2 §5.12, R32)
+services:
+  hyperprobe-poc:
+    build: .
+    ports:
+      - "8080:8080"   # calculator target
+      - "9090:9090"   # agent control API
+    volumes:
+      - ./snapshots:/app/snapshots
+    environment:
+      EMIT_STDOUT: "1"

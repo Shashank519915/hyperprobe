@@ -32,7 +32,8 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 
 ```text
 hyperprobe/
-├── Dockerfile            # PR-11 — python:3.12-slim, ENTRYPOINT bootstrap
+├── Dockerfile
+├── docker-compose.yml    # PR-11 — one-command demo
 ├── .dockerignore
 ├── agent/
 │   ├── models.py       # Breakpoint + snapshot models (PR-04)
@@ -82,6 +83,17 @@ hyperprobe/
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 11.2 complete (local)
+
+- Added `docker-compose.yml` — ports 8080/9090, `./snapshots` volume, `EMIT_STDOUT=1`
+- **Insight:** compose encodes reviewer one-command demo (R32); volume = inspect snapshots on host without `docker exec`
+- Next: commit 11.2, then task 11.3 (full demo curl verification + PR draft)
+
+### 2026-06-16 — Task 11.1 committed + pushed
+
+- Commit `c365aeb` on `feat/docker` (cherry-picked cleanly onto `main`); build + smoke verified locally
+- Single PR for 11.1–11.3 per checklist
 
 ### 2026-06-16 — Task 11.1 complete (local)
 
@@ -457,7 +469,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-10 merged to `main` (PR #10, `c836a99`). **PR-11** on `feat/docker` — task 11.1 done locally.
+PR-10 merged (`c836a99`). **PR-11** on `feat/docker` — 11.1 ✅ pushed (`c365aeb`), 11.2 done locally. **One combined PR** for 11.1–11.3.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
