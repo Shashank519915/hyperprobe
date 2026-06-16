@@ -150,12 +150,14 @@ def test_global_trace_both_captures_on_call_and_installs_local_trace():
     _run_with_tracer(tracer, lambda: tracked(7))
     captured = _drain_queue(capture_queue)
 
-    assert len(captured) == 1
-    assert captured[0].breakpoint_id == "bp-both"
-    assert id(tracked)  # function ran to completion (non-halting)
+    assert len(captured) == 2
+    assert {item.event for item in captured} == {TraceEvent.CALL, TraceEvent.RETURN}
+    assert all(item.breakpoint_id == "bp-both" for item in captured)
+    return_capture = next(item for item in captured if item.event == TraceEvent.RETURN)
+    assert return_capture.return_value == 14
 
 
-def test_global_trace_return_mode_defers_capture_to_local_trace():
+def test_global_trace_return_mode_captures_on_return():
     registry = BreakpointRegistry()
     registry.register(
         Breakpoint(
@@ -168,11 +170,18 @@ def test_global_trace_return_mode_defers_capture_to_local_trace():
     capture_queue = create_capture_queue(maxsize=10)
     tracer = Tracer(registry, capture_queue)
 
-    def later() -> str:
-        return "done"
+    def later(x: int) -> int:
+        result = x + 1
+        return result
 
-    _run_with_tracer(tracer, later)
-    assert capture_queue.empty()
+    _run_with_tracer(tracer, lambda: later(4))
+    captured = _drain_queue(capture_queue)
+
+    assert len(captured) == 1
+    assert captured[0].breakpoint_id == "bp-return"
+    assert captured[0].event == TraceEvent.RETURN
+    assert captured[0].return_value == 5
+    assert captured[0].frames[0].locals["result"] == 5
 
 
 def test_entry_hit_produces_snapshot_json(tmp_path):

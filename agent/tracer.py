@@ -50,11 +50,18 @@ class Tracer:
         event: str,
         arg: Any,
     ) -> TraceFunction | None:
-        """Scoped trace for RETURN/BOTH — return capture added in task 8.3."""
+        """Scoped trace for RETURN/BOTH — capture on ``'return'`` only (§5.3)."""
         try:
             if event != TraceEvent.RETURN.value:
                 return self.local_trace_for_function_breakpoint
-            self._frame_return_bps.pop(id(frame), None)
+            bp_ids = self._frame_return_bps.pop(id(frame), [])
+            for bp_id in bp_ids:
+                self._enqueue(
+                    frame,
+                    bp_id,
+                    TraceEvent.RETURN,
+                    return_value=arg,
+                )
             return None
         except BaseException as exc:
             print(f"local_trace error: {exc}", file=sys.stderr)

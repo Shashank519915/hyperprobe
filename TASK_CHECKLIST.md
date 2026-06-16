@@ -20,7 +20,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 5/5 | ✅ merged |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 2/2 | ✅ merged |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 3/3 | ✅ merged |
-| PR-08 | `feat/agent-tracer` | 8.1–8.6 | 2/6 | 🔄 in progress |
+| PR-08 | `feat/agent-tracer` | 8.1–8.6 | 3/6 | 🔄 in progress |
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 0/3 | ⬜ todo |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | ⬜ todo |
 | PR-11 | `feat/docker` | 11.1–11.3 | 0/3 | ⬜ todo |
@@ -1388,7 +1388,7 @@ feat(agent): add trace installer (sys + threading settrace)
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `13439df`, CI green) |
 | **Branch** | `feat/agent-tracer` |
 | **Requirements** | R4, R8, R13 |
 | **Files** | `agent/tracer.py`, `tests/test_tracer_global.py` |
@@ -1410,6 +1410,48 @@ pytest tests/ -q → 88 passed
 
 **Placeholder commit:** `feat(agent): add global_trace with fast reject and ENTRY capture`
 
+**Actual commit hash:** `13439df`
+
+**Actual commit message:**
+
+```text
+feat(agent): add global_trace with fast reject and ENTRY capture
+- Add Tracer.global_trace with O(1) fast reject and ENTRY/BOTH capture (§5.3)
+- Enqueue RawCapture via capture_raw + enqueue_capture; install local trace stub for RETURN/BOTH
+- Add tests/test_tracer_global.py with 8 cases including snapshot E2E (88 total pytest)
+- Update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 8.3 — local_trace_for_function_breakpoint
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-tracer` |
+| **Requirements** | R16, R19 |
+| **Files** | `agent/tracer.py`, `tests/test_capture_lifetime.py`, `tests/test_tracer_global.py` |
+| **Done when** | RETURN/BOTH capture on `'return'` with return_value + final locals |
+
+**Delivered:**
+
+- `local_trace_for_function_breakpoint` — per-bp RawCapture on `'return'` using trace `arg`
+- Uses `_frame_return_bps` from call-time install; ignores `'line'` events
+- `tests/test_capture_lifetime.py` — RETURN locals, BOTH call+return, multi-BP, no frame refs
+
+**Verification:**
+
+```text
+pytest tests/test_capture_lifetime.py -q → 4 passed
+pytest tests/test_tracer_global.py -q → 8 passed
+pytest tests/ -q → 92 passed
+```
+
+**Placeholder commit:** `feat(agent): add local_trace_for_function_breakpoint RETURN capture`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -1422,7 +1464,7 @@ pytest tests/ -q → 88 passed
 |------|--------|-------|-----|
 | **8.1** installer | ✅ | `agent/installer.py` | R15 |
 | **8.2** global_trace | ✅ | `agent/tracer.py` | R4, R8, R13 |
-| **8.3** local_trace function | ⬜ | `agent/tracer.py` | R16, R19 |
+| **8.3** local_trace function | ✅ | `agent/tracer.py` | R16, R19 |
 | **8.4** local_trace file_line | ⬜ | `agent/tracer.py` | R7, R17 |
 | **8.5** combined local trace | ⬜ | `agent/tracer.py` | R18 |
 | **8.6** agent thread isolation | ⬜ | worker, control_server | R24 |
