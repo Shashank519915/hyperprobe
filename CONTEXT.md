@@ -84,6 +84,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 11.7 complete (local)
+
+- New `tests/test_queue_overflow.py` — 6 tests (target completes under full queue, BOTH drop, nested calls, exception propagation)
+- **Insight:** R23 compliance = target path safety — unit tests in test_worker.py are necessary but not sufficient
+- pytest 142 passed; next: commit 11.7, then task 11.8
+
+### 2026-06-16 — Task 11.6 committed + pushed
+
+- Commit `6ce8039` on `test/integration-compliance`; CI green
+
 ### 2026-06-16 — Task 11.6 complete (local)
 
 - New `tests/test_multiple_matching_breakpoints.py` — 5 tests (function/method ENTRY JSON, mixed modes, dual BOTH)

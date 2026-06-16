@@ -24,7 +24,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ merged |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 2/2 | ✅ merged |
 | PR-11 | `feat/docker` | 11.1–11.3 | 3/3 | ✅ merged |
-| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 3/6 | 🔄 in progress |
+| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 4/6 | 🔄 in progress |
 | PR-13 | `chore/ci-hardening` | 12.2–12.3 | 0/2 | ⬜ todo |
 | PR-14 | `docs/readme` | 14.1 | 0/1 | ⬜ todo |
 
@@ -2287,7 +2287,7 @@ test: tracer tier isolation (no global line events)
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (local) |
+| **Status** | ✅ done (commit `6ce8039`, CI green) |
 | **Branch** | `test/integration-compliance` |
 | **Requirements** | R20 |
 | **Files** | `tests/test_multiple_matching_breakpoints.py` |
@@ -2318,6 +2318,56 @@ pytest tests/ -q → 136 passed
 
 **Placeholder commit:** `test: multiple matching breakpoints produce distinct snapshots`
 
+**Actual commit hash:** `6ce8039`
+
+**Actual commit message:**
+
+```text
+test: multiple matching breakpoints produce distinct snapshots
+- Add tests/test_multiple_matching_breakpoints.py — function/method ENTRY JSON, mixed modes, dual BOTH (R20)
+- pytest 136 passed; update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 11.7 — Queue overflow (target safety)
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (local) |
+| **Branch** | `test/integration-compliance` |
+| **Requirements** | R23 |
+| **Files** | `tests/test_queue_overflow.py` |
+| **Done when** | Full queue drops snapshots; traced target completes normally; no exception leak |
+
+**Delivered:**
+
+- New `tests/test_queue_overflow.py` — **6** tests (R23 compliance file)
+- Repeated ENTRY hits with maxsize=1 → correct return values; only first capture kept
+- BOTH mode: CALL accepted, RETURN dropped when full — target still returns correct value
+- Nested traced calls complete under overflow
+- Target exceptions still propagate (overflow handling does not swallow errors)
+- Rate-limited stderr on sustained drops; worker writes only accepted capture
+
+**Design notes** *(for README / review):*
+
+| Choice | Why |
+|--------|-----|
+| **Dedicated R23 file** | `test_worker.py` covers unit-level enqueue/drop; this file proves tracer/target path safety |
+| **Worker stopped during overflow** | Fills queue without draining — isolates drop behavior from worker throughput |
+| **Correctness over completeness** | §5.8.1 — target execution always wins; snapshots are best-effort under overload |
+
+**Verification:**
+
+```text
+pytest tests/test_queue_overflow.py -q → 6 passed
+pytest tests/ -q → 142 passed
+```
+
+**Placeholder commit:** `test: queue overflow drops without breaking target`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -2331,7 +2381,7 @@ pytest tests/ -q → 136 passed
 | **11.4** RETURN/BOTH tests | ✅ | `tests/test_capture_lifetime.py` | R16 |
 | **11.5** tracer tiers | ✅ | `tests/test_tracer_tiers.py` | R17 |
 | **11.6** multiple BPs | ✅ | `tests/test_multiple_matching_breakpoints.py` | R20 |
-| **11.7** queue overflow | ⬜ | tests | R23 |
+| **11.7** queue overflow | ✅ | `tests/test_queue_overflow.py` | R23 |
 | **11.8** file_line BP | ⬜ | `tests/test_file_line_bp.py` | R7, R22 |
 | **12.1** COMPLIANCE_CHECKLIST | ⬜ | `COMPLIANCE_CHECKLIST.md` | R34 |
 | _integration_ | ⬜ | `test_integration.py`, `test_concurrency.py` | R1, R13 |
@@ -2365,4 +2415,4 @@ pytest tests/ -q → 136 passed
 
 ---
 
-*Last updated: 2026-06-16 — task 11.6 complete (local)*
+*Last updated: 2026-06-16 — task 11.7 complete (local)*
