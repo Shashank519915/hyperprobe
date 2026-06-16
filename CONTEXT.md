@@ -89,6 +89,16 @@ Append newest entries at the **top**.
 - PR #12 merged to `main` (merge `6e9b773`); CI green
 - Tasks 11.4–12.1 + `COMPLIANCE_CHECKLIST.md` on main; branch `chore/ci-hardening` for PR-13
 
+### 2026-06-16 — Task 12.3 complete (local)
+
+- CI `docker` job: `docker compose config` + `docker compose build`; added `chore/**` trigger
+- **Choice:** build-only in container — slim image has no pytest (host test job covers suite)
+- PR-13 scope complete; next: commit 12.3, open combined PR-13
+
+### 2026-06-16 — Task 12.2 committed + pushed
+
+- Commit `e090fb3` on `chore/ci-hardening`; CI green
+
 ### 2026-06-16 — Task 12.2 complete (local)
 
 - Finalized purity: `scripts/target_purity_check.py` + bash wrapper; 11 meta-tests

@@ -63,7 +63,7 @@ pytest tests/test_capture_lifetime.py tests/test_tracer_tiers.py `
 | **R29** | YAML seed loads function, method, file_line | `breakpoints.yaml`; `tests/test_breakpoints_yaml.py::test_load_repo_breakpoints_yaml_registers_all_seed_types` | ✅ |
 | **R30** | Safe serialization (depth, cycles, callables) | `tests/test_serializer.py` | ✅ |
 | **R31** | Error isolation in trace callback and worker | `agent/tracer.py` (BaseException handlers); `tests/test_worker.py::test_worker_continues_after_processing_error` | ✅ |
-| **R32** | Docker one-command startup | `Dockerfile`, `docker-compose.yml`; manual: `docker compose up --build` (`notes/DEMO_COMMANDS.md`). **CI docker job:** PR-13 task 12.3 | ⚠️ manual |
+| **R32** | Docker one-command startup | `Dockerfile`, `docker-compose.yml`; CI: `.github/workflows/ci.yml` `docker` job (`docker compose build`); manual demo: `notes/DEMO_COMMANDS.md` | ✅ |
 | **R33** | Human-written README | `README.md` — PR-14 task 14.1 (candidate-authored) | ⬜ pending |
 | **R34** | This compliance checklist in repo | `COMPLIANCE_CHECKLIST.md` (this file) | ✅ |
 
@@ -88,7 +88,7 @@ pytest tests/test_capture_lifetime.py tests/test_tracer_tiers.py `
 | Item | Requirement | Planned |
 |------|-------------|---------|
 | Concurrent HTTP load under trace | R13 | Optional `tests/test_concurrency.py` |
-| Docker build in CI on every merge | R32 | PR-13 task 12.3 |
+| Docker build in CI on every merge | R32 | `.github/workflows/ci.yml` docker job (task 12.3) |
 | Candidate README | R33 | PR-14 task 14.1 |
 
 ---
@@ -100,4 +100,4 @@ GitHub Actions workflow `.github/workflows/ci.yml` on every PR/push:
 1. `pytest tests/ -q`
 2. `bash scripts/check_target_purity.sh`
 
-Covers automated evidence for R1–R31 (except R13 concurrent load and R32 container run).
+Covers automated evidence for R1–R31 and R32 docker build (except R13 concurrent load).
