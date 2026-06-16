@@ -24,7 +24,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ merged |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 2/2 | ✅ merged |
 | PR-11 | `feat/docker` | 11.1–11.3 | 3/3 | ✅ merged |
-| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 2/6 | 🔄 in progress |
+| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 3/6 | 🔄 in progress |
 | PR-13 | `chore/ci-hardening` | 12.2–12.3 | 0/2 | ⬜ todo |
 | PR-14 | `docs/readme` | 14.1 | 0/1 | ⬜ todo |
 
@@ -2238,7 +2238,7 @@ test: capture RETURN and BOTH modes
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `e723689`, CI green) |
 | **Branch** | `test/integration-compliance` |
 | **Requirements** | R17 |
 | **Files** | `tests/test_tracer_tiers.py` |
@@ -2269,6 +2269,55 @@ pytest tests/ -q → 131 passed
 
 **Placeholder commit:** `test: tracer tier isolation (no global line events)`
 
+**Actual commit hash:** `e723689`
+
+**Actual commit message:**
+
+```text
+test: tracer tier isolation (no global line events)
+- Extend tests/test_tracer_tiers.py — global ignores return, BOTH, wrong line (R17)
+- pytest 131 passed; update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 11.6 — Multiple matching breakpoints
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (local) |
+| **Branch** | `test/integration-compliance` |
+| **Requirements** | R20 |
+| **Files** | `tests/test_multiple_matching_breakpoints.py` |
+| **Done when** | Two BPs same target → single call → distinct `breakpoint_id` snapshots (no dedup) |
+
+**Delivered:**
+
+- New `tests/test_multiple_matching_breakpoints.py` — **5** tests (R20 compliance file)
+- Function ENTRY ×2 → two queue captures + two snapshot JSON files with distinct ids
+- Method qualname ×2 → two worker snapshots (module-level `_MetricEngine` for exact qualname)
+- Mixed ENTRY + RETURN on same function → CALL + RETURN captures, distinct ids
+- Two BOTH BPs same function → four captures (CALL+RETURN per id)
+
+**Design notes** *(for README / review):*
+
+| Choice | Why |
+|--------|-----|
+| **Dedicated R20 file** | Registry/tracer tests exist elsewhere; this file proves end-to-end snapshot distinctness |
+| **Worker JSON tests** | Queue-only checks insufficient for R20 — snapshots must carry per-BP `breakpoint_id` |
+| **Module-level method class** | Same qualname rule as task 11.4 — nested classes break method BP matching |
+
+**Verification:**
+
+```text
+pytest tests/test_multiple_matching_breakpoints.py -q → 5 passed
+pytest tests/ -q → 136 passed
+```
+
+**Placeholder commit:** `test: multiple matching breakpoints produce distinct snapshots`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -2281,7 +2330,7 @@ pytest tests/ -q → 131 passed
 |------|--------|-------|-----|
 | **11.4** RETURN/BOTH tests | ✅ | `tests/test_capture_lifetime.py` | R16 |
 | **11.5** tracer tiers | ✅ | `tests/test_tracer_tiers.py` | R17 |
-| **11.6** multiple BPs | ⬜ | `tests/test_multiple_matching_breakpoints.py` | R20 |
+| **11.6** multiple BPs | ✅ | `tests/test_multiple_matching_breakpoints.py` | R20 |
 | **11.7** queue overflow | ⬜ | tests | R23 |
 | **11.8** file_line BP | ⬜ | `tests/test_file_line_bp.py` | R7, R22 |
 | **12.1** COMPLIANCE_CHECKLIST | ⬜ | `COMPLIANCE_CHECKLIST.md` | R34 |
@@ -2316,4 +2365,4 @@ pytest tests/ -q → 131 passed
 
 ---
 
-*Last updated: 2026-06-15 — task 1.1 complete*
+*Last updated: 2026-06-16 — task 11.6 complete (local)*

@@ -84,6 +84,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 11.6 complete (local)
+
+- New `tests/test_multiple_matching_breakpoints.py` — 5 tests (function/method ENTRY JSON, mixed modes, dual BOTH)
+- **Insight:** R20 requires per-BP snapshots — registry lookup returns all ids; tracer enqueues one RawCapture per id
+- pytest 136 passed; next: commit 11.6, then task 11.7
+
+### 2026-06-16 — Task 11.5 committed + pushed
+
+- Commit `e723689` on `test/integration-compliance`; CI green
+
 ### 2026-06-16 — Task 11.5 complete (local)
 
 - Extended `tests/test_tracer_tiers.py` — 10 tests (global ignores return, no spurious LINE, BOTH, wrong line)
