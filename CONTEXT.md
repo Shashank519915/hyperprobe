@@ -84,6 +84,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 11.8 complete (local)
+
+- New `tests/test_file_line_bp.py` — 6 tests (relative/absolute/messy paths, exact line 5, worker JSON)
+- **Insight:** R22 normalization must hold in registry watched_files, line lookup, and snapshot stack `file` field
+- pytest 148 passed; next: commit 11.8, then task 12.1
+
+### 2026-06-16 — Task 11.7 committed + pushed
+
+- Commit `0a835e9` on `test/integration-compliance`; CI green
+
 ### 2026-06-16 — Task 11.7 complete (local)
 
 - New `tests/test_queue_overflow.py` — 6 tests (target completes under full queue, BOTH drop, nested calls, exception propagation)

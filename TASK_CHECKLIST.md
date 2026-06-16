@@ -24,7 +24,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ merged |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 2/2 | ✅ merged |
 | PR-11 | `feat/docker` | 11.1–11.3 | 3/3 | ✅ merged |
-| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 4/6 | 🔄 in progress |
+| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 5/6 | 🔄 in progress |
 | PR-13 | `chore/ci-hardening` | 12.2–12.3 | 0/2 | ⬜ todo |
 | PR-14 | `docs/readme` | 14.1 | 0/1 | ⬜ todo |
 
@@ -2336,7 +2336,7 @@ test: multiple matching breakpoints produce distinct snapshots
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (local) |
+| **Status** | ✅ done (commit `0a835e9`, CI green) |
 | **Branch** | `test/integration-compliance` |
 | **Requirements** | R23 |
 | **Files** | `tests/test_queue_overflow.py` |
@@ -2368,6 +2368,56 @@ pytest tests/ -q → 142 passed
 
 **Placeholder commit:** `test: queue overflow drops without breaking target`
 
+**Actual commit hash:** `0a835e9`
+
+**Actual commit message:**
+
+```text
+test: queue overflow drops without breaking target
+- Add tests/test_queue_overflow.py — target completes under full queue, BOTH drop, nested calls, exception propagation (R23)
+- pytest 142 passed; update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 11.8 — file_line breakpoint at normalized path
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (local) |
+| **Branch** | `test/integration-compliance` |
+| **Requirements** | R7, R22 |
+| **Files** | `tests/test_file_line_bp.py` |
+| **Done when** | file_line fires at exact line; relative/absolute/messy paths normalize to same watched file |
+
+**Delivered:**
+
+- New `tests/test_file_line_bp.py` — **6** tests (R7/R22 compliance file)
+- Relative YAML-style path (`target/engines/addition.py`) matches runtime absolute `co_filename`
+- Non-executed line (class header line 1) → no capture during `add()` call
+- Dot-segment relative path (`target/../target/...`) registers watched file and fires
+- RETURN + BOTH end-to-end via `AdditionEngine.add` at line 5 (`return a + b`)
+- Worker JSON snapshot includes normalized `file` path and exact `line`
+
+**Design notes** *(for README / review):*
+
+| Choice | Why |
+|--------|-----|
+| **Dedicated R7/R22 file** | Matcher unit tests in `test_breakpoints.py`; tier tests in `test_tracer_tiers.py` — this file proves tracer + worker path |
+| **`AdditionEngine.add` line 5** | Same seed as `breakpoints.yaml`; single-line body makes exact-line assertions unambiguous |
+| **Wrong line = line 1** | Class header never executes on method call — stronger than arbitrary line 999 |
+
+**Verification:**
+
+```text
+pytest tests/test_file_line_bp.py -q → 6 passed
+pytest tests/ -q → 148 passed
+```
+
+**Placeholder commit:** `test: file_line breakpoint at normalized path`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -2382,7 +2432,7 @@ pytest tests/ -q → 142 passed
 | **11.5** tracer tiers | ✅ | `tests/test_tracer_tiers.py` | R17 |
 | **11.6** multiple BPs | ✅ | `tests/test_multiple_matching_breakpoints.py` | R20 |
 | **11.7** queue overflow | ✅ | `tests/test_queue_overflow.py` | R23 |
-| **11.8** file_line BP | ⬜ | `tests/test_file_line_bp.py` | R7, R22 |
+| **11.8** file_line BP | ✅ | `tests/test_file_line_bp.py` | R7, R22 |
 | **12.1** COMPLIANCE_CHECKLIST | ⬜ | `COMPLIANCE_CHECKLIST.md` | R34 |
 | _integration_ | ⬜ | `test_integration.py`, `test_concurrency.py` | R1, R13 |
 
@@ -2415,4 +2465,4 @@ pytest tests/ -q → 142 passed
 
 ---
 
-*Last updated: 2026-06-16 — task 11.7 complete (local)*
+*Last updated: 2026-06-16 — task 11.8 complete (local)*
