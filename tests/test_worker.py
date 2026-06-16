@@ -13,8 +13,12 @@ from agent.models import (
 )
 from agent.registry import BreakpointRegistry
 from agent.worker import (
+    DEFAULT_CAPTURE_QUEUE_MAXSIZE,
+    DropLogger,
     SnapshotWorker,
     build_snapshot,
+    create_capture_queue,
+    enqueue_capture,
     snapshot_to_dict,
 )
 
@@ -185,3 +189,79 @@ def test_worker_disables_tracing_in_worker_thread(registry_with_add_bp):
 
     assert seen.get("sys") is None
     assert seen.get("threading") is None
+
+
+def test_create_capture_queue_default_maxsize():
+    capture_queue = create_capture_queue()
+    assert capture_queue.maxsize == DEFAULT_CAPTURE_QUEUE_MAXSIZE
+
+
+def test_enqueue_capture_accepts_until_full():
+    capture_queue = create_capture_queue(maxsize=2)
+    raw = _sample_raw()
+    assert enqueue_capture(capture_queue, raw) is True
+    assert enqueue_capture(capture_queue, raw) is True
+    assert capture_queue.qsize() == 2
+
+
+def test_enqueue_capture_drops_when_full_without_raising(capsys):
+    capture_queue = create_capture_queue(maxsize=1)
+    raw = _sample_raw()
+    drop_logger = DropLogger(min_interval_seconds=60.0)
+
+    assert enqueue_capture(capture_queue, raw, drop_logger=drop_logger) is True
+    assert enqueue_capture(capture_queue, raw, drop_logger=drop_logger) is False
+    assert capture_queue.qsize() == 1
+
+    captured = capsys.readouterr()
+    assert "snapshot dropped: queue full" in captured.err
+
+
+def test_drop_logger_rate_limits_repeated_warnings(capsys):
+    drop_logger = DropLogger(min_interval_seconds=60.0)
+    for _ in range(5):
+        drop_logger.warn_queue_full()
+
+    captured = capsys.readouterr()
+    assert captured.err.count("snapshot dropped: queue full") == 1
+
+
+def test_drop_logger_reports_suppressed_count_after_interval(monkeypatch, capsys):
+    drop_logger = DropLogger(min_interval_seconds=10.0)
+    times = iter([0.0, 1.0, 11.0])
+
+    monkeypatch.setattr("agent.worker.time.monotonic", lambda: next(times))
+
+    drop_logger.warn_queue_full()
+    drop_logger.warn_queue_full()
+    drop_logger.warn_queue_full()
+
+    captured = capsys.readouterr()
+    lines = [line for line in captured.err.splitlines() if line]
+    assert len(lines) == 2
+    assert lines[0] == "snapshot dropped: queue full"
+    assert lines[1] == "snapshot dropped: queue full (1 additional drops suppressed)"
+
+
+def test_bounded_queue_with_worker_processes_accepted_only(
+    tmp_path, registry_with_add_bp
+):
+    capture_queue = create_capture_queue(maxsize=1)
+    worker = SnapshotWorker(
+        capture_queue,
+        registry_with_add_bp,
+        output_dir=tmp_path,
+    )
+    drop_logger = DropLogger(min_interval_seconds=60.0)
+    worker.start()
+
+    first = _sample_raw()
+    second = _sample_raw()
+    assert enqueue_capture(capture_queue, first, drop_logger=drop_logger) is True
+    assert enqueue_capture(capture_queue, second, drop_logger=drop_logger) is False
+
+    capture_queue.join()
+    worker.stop()
+
+    assert len(list(tmp_path.glob("*.json"))) == 1
+

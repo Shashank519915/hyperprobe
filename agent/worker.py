@@ -7,6 +7,7 @@ import os
 import queue
 import sys
 import threading
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -21,6 +22,62 @@ from agent.models import (
 )
 from agent.registry import BreakpointRegistry
 from agent.serializer import SafeSerializer
+
+DEFAULT_CAPTURE_QUEUE_MAXSIZE = 1000
+
+
+class DropLogger:
+    """Rate-limit queue-full warnings to agent stderr (§5.8.1)."""
+
+    def __init__(self, min_interval_seconds: float = 1.0) -> None:
+        self._min_interval = min_interval_seconds
+        self._lock = threading.Lock()
+        self._last_emit: float | None = None
+        self._suppressed = 0
+
+    def warn_queue_full(self) -> None:
+        now = time.monotonic()
+        with self._lock:
+            if (
+                self._last_emit is None
+                or now - self._last_emit >= self._min_interval
+            ):
+                suffix = ""
+                if self._suppressed:
+                    suffix = f" ({self._suppressed} additional drops suppressed)"
+                print(
+                    f"snapshot dropped: queue full{suffix}",
+                    file=sys.stderr,
+                )
+                self._last_emit = now
+                self._suppressed = 0
+            else:
+                self._suppressed += 1
+
+
+_default_drop_logger = DropLogger()
+
+
+def create_capture_queue(
+    maxsize: int = DEFAULT_CAPTURE_QUEUE_MAXSIZE,
+) -> queue.Queue[RawCapture]:
+    """Create a bounded queue for trace-callback enqueue (§5.8.1)."""
+    return queue.Queue(maxsize=maxsize)
+
+
+def enqueue_capture(
+    capture_queue: queue.Queue[RawCapture],
+    raw: RawCapture,
+    *,
+    drop_logger: DropLogger | None = None,
+) -> bool:
+    """Non-blocking enqueue for trace callbacks. Returns True if accepted."""
+    try:
+        capture_queue.put_nowait(raw)
+    except queue.Full:
+        (drop_logger or _default_drop_logger).warn_queue_full()
+        return False
+    return True
 
 
 def breakpoint_payload(bp: Breakpoint | None, breakpoint_id: str) -> dict[str, Any]:

@@ -75,6 +75,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 6.3 complete (local)
+
+- Added `create_capture_queue`, `enqueue_capture`, `DropLogger` to `agent/worker.py` (§5.8.1)
+- Extended `tests/test_worker.py` — 6 overflow tests (13 total); pytest 74 passed
+- PR-07 ready — open PR after commit + push
+
+### 2026-06-16 — Task 6.2 committed + pushed
+
+- Commit `7fb47c6` on `feat/agent-capture-worker`; CI green
+
 ### 2026-06-16 — Task 6.2 complete (local)
 
 - Added `agent/worker.py` — `build_snapshot`, `SnapshotWorker`, JSON write to `snapshots/`
@@ -303,7 +313,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-06 merged to `main`. **PR-07** on `feat/agent-capture-worker` — tasks 6.1 ✅, 6.2 done locally.
+PR-06 merged to `main`. **PR-07** on `feat/agent-capture-worker` — tasks 6.1–6.3 done locally; open PR after 6.3 commit + push.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 

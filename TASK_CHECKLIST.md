@@ -19,7 +19,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-04 | `feat/agent-data-models` | 4.1–4.2 | 2/2 | ✅ merged |
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 5/5 | ✅ merged |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 2/2 | ✅ merged |
-| PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 2/3 | 🔄 in progress |
+| PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 3/3 | ✅ ready for PR |
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 0/6 | ⬜ todo |
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 0/3 | ⬜ todo |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | ⬜ todo |
@@ -1211,7 +1211,7 @@ feat(agent): add synchronous RawCapture from live frames
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `7fb47c6`, CI green) |
 | **Branch** | `feat/agent-capture-worker` |
 | **Requirements** | R11, R12 |
 | **Files** | `agent/worker.py`, `tests/test_worker.py` |
@@ -1232,6 +1232,48 @@ pytest tests/ -q → 68 passed
 
 **Placeholder commit:** `feat(agent): add SnapshotWorker background thread`
 
+**Actual commit hash:** `7fb47c6`
+
+**Actual commit message:**
+
+```text
+feat(agent): add SnapshotWorker background thread
+- Add build_snapshot and snapshot_to_dict in agent/worker.py
+- SnapshotWorker consumes queue, serializes locals, writes snapshots/*.json
+- Disable tracing on worker thread; optional EMIT_STDOUT (R11, R12)
+- Add tests/test_worker.py with 7 cases (68 total pytest)
+- Update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 6.3 — Bounded queue overflow policy
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-capture-worker` |
+| **Requirements** | R23 |
+| **Files** | `agent/worker.py`, `tests/test_worker.py` |
+| **Done when** | `Queue(maxsize=1000)`, `put_nowait`, drop silently, rate-limited stderr |
+
+**Delivered:**
+
+- `create_capture_queue()` — bounded queue (default maxsize 1000)
+- `enqueue_capture()` — non-blocking `put_nowait`; never raises to caller
+- `DropLogger` — rate-limited `snapshot dropped: queue full` on agent stderr
+
+**Verification:**
+
+```text
+pytest tests/test_worker.py -q → 13 passed
+pytest tests/ -q → 74 passed
+```
+
+**Placeholder commit:** `feat(agent): bounded capture queue with loss-tolerant overflow`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -1244,9 +1286,50 @@ pytest tests/ -q → 68 passed
 |------|--------|-------|-----|
 | **6.1** sync RawCapture | ✅ | `agent/capture.py` | R8, R9, R19 |
 | **6.2** SnapshotWorker | ✅ | `agent/worker.py` | R11, R12 |
-| **6.3** queue overflow | ⬜ | `agent/worker.py` | R23 |
+| **6.3** queue overflow | ✅ | `agent/worker.py` | R23 |
 
----
+**PR-07 merge checklist:**
+
+- [x] All tasks 6.1–6.3 ✅
+- [ ] CI green on PR
+- [ ] PR merged to `main`
+
+**Pull request draft** *(copy to GitHub after task 6.3 push):*
+
+| Field | Value |
+|-------|--------|
+| **When** | Now — after task 6.3 commit + push |
+| **Base ← Compare** | `main` ← `feat/agent-capture-worker` |
+| **Title** | `feat(agent): capture worker pipeline (PR-07)` |
+
+**Description** (paste into GitHub PR body):
+
+```markdown
+## Summary
+Sync capture from live frames + async snapshot pipeline — worker serializes copied data and writes JSON; bounded loss-tolerant queue (R8–R12, R19, R23).
+
+## Tasks included
+
+### Task 6.1 — Synchronous RawCapture
+- **Files:** `agent/capture.py`, `tests/test_capture.py`
+- **Behavior:** `f_back` walk, shallow `dict(f_locals)`, return value on RETURN
+- **Verification:** 8 tests; pytest 61 passed (after 6.1)
+
+### Task 6.2 — SnapshotWorker
+- **Files:** `agent/worker.py`, `tests/test_worker.py`
+- **Behavior:** Build Snapshot from RawCapture, SafeSerializer, JSON to `snapshots/`; worker thread disables tracing
+- **Verification:** 7 worker tests; pytest 68 passed (after 6.2)
+
+### Task 6.3 — Queue overflow policy
+- **Files:** `agent/worker.py`, `tests/test_worker.py`
+- **Behavior:** `Queue(maxsize=1000)`, `enqueue_capture` via `put_nowait`, rate-limited drop warnings (§5.8.1)
+- **Verification:** 13 worker tests; pytest 74 passed
+
+## Test plan
+- [ ] `pytest tests/test_capture.py tests/test_worker.py -q` → 21 passed
+- [ ] `pytest tests/ -q` → 74 passed
+- [ ] CI green
+```
 
 ## PR-08 — `feat/agent-tracer` ⚠️ critical path
 
