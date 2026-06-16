@@ -12,7 +12,7 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 | **GitHub** | https://github.com/Shashank519915/hyperprobe.git |
 | **Structure** | Monorepo — `target/` + `agent/` in one repo |
 | **Default branch** | `main` |
-| **Active branch** | `feat/agent-control-api` (PR-09) |
+| **Active branch** | `feat/agent-bootstrap` (PR-10) |
 | **CI workflows** | `ci` (pytest + purity) · `Dependency Graph` (Dependabot — automatic) |
 
 ---
@@ -41,7 +41,8 @@ hyperprobe/
 │   ├── worker.py       # SnapshotWorker + JSON write (PR-07)
 │   ├── installer.py    # sys.settrace + threading.settrace (PR-08)
 │   ├── tracer.py       # global_trace + local trace tiers (PR-08)
-│   └── control_server.py  # control API :9090 (PR-09)
+│   ├── control_server.py  # control API :9090 (PR-09)
+│   └── bootstrap.py       # prod entrypoint (PR-10)
 ├── target/
 │   ├── handlers.py     # layer 1 — RouteHandler
 │   ├── server.py       # ThreadingHTTPServer :8080 (PR-03)
@@ -70,6 +71,7 @@ hyperprobe/
 | 2026-06-15 | Design docs in `notes/` gitignored; submission README holds 1–2 para architecture |
 | 2026-06-15 | Pin runtime to **Python 3.12** (verified locally on 3.12.10) |
 | 2026-06-15 | Ports: target `:8080`, agent control `:9090` |
+| 2026-06-16 | `notes/DEMO_COMMANDS.md` — updated after each merged PR / verified milestone (setup + commands only) |
 | 2026-06-16 | Task completion notes include **design choices / tradeoffs** (for README later) |
 | 2026-06-16 | Commit command format: explicit `git add` paths + multi `-m` body (not heredoc) |
 
@@ -79,7 +81,19 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
-### 2026-06-16 — Task 9.3 complete (local)
+### 2026-06-16 — Task 10.1 complete (local)
+
+- Added `agent/bootstrap.py` — YAML → registry, worker, control :9090, trace install, target :8080
+- **Fix:** `disable_tracing_on_current_thread()` — `sys.settrace(None)` only (not `threading.settrace(None)`); preserves calculator thread tracing
+- **Fix:** control server `process_request_thread` disables tracing on handler threads
+- pytest 118 passed; next: commit 10.1, then task 10.2 (smoke test)
+
+### 2026-06-16 — PR-09 merged
+
+- PR #9 merged to `main` (merge `cdb87a5`); CI green
+- Branch `feat/agent-bootstrap` for PR-10
+
+### 2026-06-16 — Task 9.3 committed + pushed
 
 - Added `tests/test_control_api.py` — dynamic registration integration test (R25, §5.13)
 - Flow: no BP → no snapshot → `POST /breakpoints` → `AdditionEngine.add` → snapshot JSON
@@ -416,7 +430,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-08 merged to `main`. **PR-09** on `feat/agent-control-api` — tasks 9.1 ✅, 9.2 ✅ (`33a3718`), 9.3 done locally (ready for commit + PR).
+PR-09 merged to `main` (PR #9, `cdb87a5`). **PR-10** on `feat/agent-bootstrap` — task 10.1 done locally.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 

@@ -62,6 +62,10 @@ def remove_trace(installer: TraceInstaller) -> None:
 
 
 def disable_tracing_on_current_thread() -> None:
-    """Agent-owned threads must not inherit target tracing (§5.11, R24)."""
+    """Agent-owned threads must not inherit target tracing (§5.11, R24).
+
+    Only clears the *current* thread via ``sys.settrace`` — does not call
+    ``threading.settrace(None)``, which would remove the global hook that
+    calculator request threads inherit from bootstrap.
+    """
     sys.settrace(None)
-    threading.settrace(None)

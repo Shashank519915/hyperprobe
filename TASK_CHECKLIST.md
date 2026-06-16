@@ -21,8 +21,8 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 2/2 | ✅ merged |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 3/3 | ✅ merged |
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 6/6 | ✅ merged |
-| PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ ready for PR |
-| PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | ⬜ todo |
+| PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ merged |
+| PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | 🔄 in progress |
 | PR-11 | `feat/docker` | 11.1–11.3 | 0/3 | ⬜ todo |
 | PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 0/6 | ⬜ todo |
 | PR-13 | `chore/ci-hardening` | 12.2–12.3 | 0/2 | ⬜ todo |
@@ -1781,8 +1781,8 @@ pytest tests/ -q → 117 passed
 **PR-09 merge checklist:**
 
 - [x] All tasks 9.1–9.3 ✅
-- [ ] CI green on PR
-- [ ] PR merged to `main`
+- [x] CI green on PR
+- [x] PR merged to `main` (PR #9, merge `cdb87a5`)
 
 **Pull request draft** *(open after task 9.3 commit + push):*
 
@@ -1822,9 +1822,50 @@ Agent control HTTP API on `:9090` — list and register breakpoints at runtime w
 
 ## PR-10 — `feat/agent-bootstrap`
 
+### Task 10.1 — Bootstrap entrypoint
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-bootstrap` |
+| **Requirements** | R4, R24, R29 |
+| **Files** | `agent/bootstrap.py`, `agent/installer.py`, `agent/control_server.py`, `tests/test_agent_thread_isolation.py` |
+| **Done when** | `python -m agent.bootstrap` serves calculator :8080 + control :9090 |
+
+**Delivered:**
+
+- `agent/bootstrap.py` — `start_agent()` wires YAML → registry, worker, tracer, control API; `run()` blocks on target `serve_forever`
+- `python -m agent.bootstrap` — single supported prod entrypoint (§5.1)
+- Env overrides: `TARGET_HOST`/`TARGET_PORT`, `CONTROL_HOST`/`CONTROL_PORT`, `BREAKPOINTS_YAML`, `SNAPSHOTS_DIR`
+
+**Design notes** *(for README / review):*
+
+- **Startup order (§5.1):** load seed YAML → worker + control server → `install_trace` → import `target.server` (external attachment — target never imports agent)
+- **`threading.settrace` preserved:** `disable_tracing_on_current_thread()` now only calls `sys.settrace(None)` on the current thread. Previously it also called `threading.settrace(None)`, which wiped the global hook and prevented calculator request threads from being traced after agent threads started
+- **Control handler threads:** override `process_request_thread` (not `process_request`) to disable tracing — `ThreadingHTTPServer` spawns handler work in a child thread
+- **`AgentRuntime` + `start_agent()`:** exposed for task 10.2 smoke test (ephemeral ports without blocking forever)
+
+**Verification:**
+
+```text
+Manual: start_agent + target on ephemeral ports → GET /calculate 200 + GET /breakpoints 200 + snapshot JSON after request
+pytest tests/test_agent_thread_isolation.py -q → 5 passed
+pytest tests/ -q → 118 passed
+```
+
+**Placeholder commit:** `feat(agent): add bootstrap entrypoint`
+
+**Actual commit hash:**
+
+**Actual commit message:**
+
+**Notes:**
+
+---
+
 | Task | Status | Files | Req |
 |------|--------|-------|-----|
-| **10.1** bootstrap entrypoint | ⬜ | `agent/bootstrap.py` | R4, R24, R29 |
+| **10.1** bootstrap entrypoint | ✅ | `agent/bootstrap.py` | R4, R24, R29 |
 | **10.2** smoke test | ⬜ | tests | R1, R11 |
 
 ---
