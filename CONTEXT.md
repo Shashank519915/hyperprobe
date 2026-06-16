@@ -12,7 +12,7 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 | **GitHub** | https://github.com/Shashank519915/hyperprobe.git |
 | **Structure** | Monorepo — `target/` + `agent/` in one repo |
 | **Default branch** | `main` |
-| **Active branch** | `feat/agent-capture-worker` (PR-07) |
+| **Active branch** | `feat/agent-tracer` (PR-08) |
 | **CI workflows** | `ci` (pytest + purity) · `Dependency Graph` (Dependabot — automatic) |
 
 ---
@@ -38,7 +38,10 @@ hyperprobe/
 │   ├── registry.py     # BreakpointRegistry
 │   ├── serializer.py   # SafeSerializer (PR-06)
 │   ├── capture.py      # sync RawCapture from live frames (PR-07)
-│   └── worker.py       # SnapshotWorker + JSON write (PR-07)
+│   ├── worker.py       # SnapshotWorker + JSON write (PR-07)
+│   ├── installer.py    # sys.settrace + threading.settrace (PR-08)
+│   ├── tracer.py       # global_trace + local trace tiers (PR-08)
+│   └── control_server.py  # control server stub, tracing disabled (PR-08/09)
 ├── target/
 │   ├── handlers.py     # layer 1 — RouteHandler
 │   ├── server.py       # ThreadingHTTPServer :8080 (PR-03)
@@ -74,6 +77,73 @@ hyperprobe/
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 8.6 complete (local)
+
+- Added `disable_tracing_on_current_thread()`; wired in worker + `AgentControlServer` stub
+- Added `tests/test_agent_thread_isolation.py` — 4 tests; pytest 104 passed
+- PR-08 complete — open PR after commit + push
+
+### 2026-06-16 — Task 8.5 committed + pushed
+
+- Commit `00f8f73` on `feat/agent-tracer`; CI green
+
+### 2026-06-16 — Task 8.5 complete (local)
+
+- Added `local_trace_combined` dispatcher when method RETURN/BOTH overlaps watched file (§5.3 step 5)
+- Added `tests/test_tracer_combined.py` — 3 tests; pytest 100 passed
+- Next: commit 8.5, then task 8.6 (agent thread isolation)
+
+### 2026-06-16 — Task 8.4 committed + pushed
+
+- Commit `afeba41` on `feat/agent-tracer`; CI green
+
+### 2026-06-16 — Task 8.4 complete (local)
+
+- Added `local_trace_for_file_line_breakpoint` + `_capture_file_line_hits` (§5.3)
+- Added `tests/test_tracer_tiers.py` — 5 tests; pytest 97 passed
+- Next: commit 8.4, then task 8.5 (combined local trace)
+
+### 2026-06-16 — Task 8.3 committed + pushed
+
+- Commit `0e05fc3` on `feat/agent-tracer`; CI green
+
+### 2026-06-16 — Task 8.3 complete (local)
+
+- Implemented RETURN/BOTH capture in `local_trace_for_function_breakpoint` (§5.3)
+- Added `tests/test_capture_lifetime.py` — 4 tests; updated BOTH/RETURN in `test_tracer_global.py`
+- pytest 92 passed
+- Next: commit 8.3, then task 8.4 (file_line local trace)
+
+### 2026-06-16 — Task 8.2 committed + pushed
+
+- Commit `13439df` on `feat/agent-tracer`; CI green
+
+### 2026-06-16 — Task 8.2 complete (local)
+
+- Added `agent/tracer.py` — `Tracer.global_trace` with fast reject + ENTRY capture (§5.3)
+- Added `tests/test_tracer_global.py` — 8 tests; pytest 88 passed
+- Next: commit 8.2, then task 8.3 (local_trace RETURN/BOTH)
+
+### 2026-06-16 — Task 8.1 committed + pushed
+
+- Commit `2bea1ba` on `feat/agent-tracer`; CI green
+
+### 2026-06-16 — Task 8.1 complete (local)
+
+- Added `agent/installer.py` — `TraceInstaller`, `install_trace`, `remove_trace` (R15)
+- Added `tests/test_installer.py` — 6 tests; pytest 80 passed
+- Next: commit 8.1, then task 8.2 (global_trace)
+
+### 2026-06-16 — PR-07 merged
+
+- PR #7 merged to `main` (merge `03279c0`); CI green
+- Capture pipeline on main: capture.py, worker.py, 74 pytest at merge
+- Branch `feat/agent-tracer` for PR-08
+
+### 2026-06-16 — Task 6.3 committed + pushed
+
+- Commit `211c9a4`; opened PR #7
 
 ### 2026-06-16 — Task 6.3 complete (local)
 
@@ -313,7 +383,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-06 merged to `main`. **PR-07** on `feat/agent-capture-worker` — tasks 6.1–6.3 done locally; open PR after 6.3 commit + push.
+PR-07 merged to `main`. **PR-08** on `feat/agent-tracer` — all tasks 8.1–8.6 done locally; open PR after 8.6 commit + push.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 

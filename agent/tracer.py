@@ -1,0 +1,228 @@
+"""Two-tier sys.settrace callbacks (ARCHITECTURE_V2 §5.3)."""
+
+from __future__ import annotations
+
+import queue
+import sys
+import types
+from typing import Any
+
+from agent.breakpoints import normalize_path
+from agent.capture import capture_raw
+from agent.installer import TraceFunction
+from agent.models import CaptureMode, RawCapture, TraceEvent
+from agent.registry import BreakpointRegistry
+from agent.worker import DropLogger, enqueue_capture
+
+
+class Tracer:
+    """Process-wide global trace with ENTRY capture on function/method hits."""
+
+    def __init__(
+        self,
+        registry: BreakpointRegistry,
+        capture_queue: queue.Queue[RawCapture],
+        *,
+        drop_logger: DropLogger | None = None,
+    ) -> None:
+        self._registry = registry
+        self._capture_queue = capture_queue
+        self._drop_logger = drop_logger
+        self._frame_return_bps: dict[int, list[str]] = {}
+
+    def global_trace(
+        self,
+        frame: types.FrameType,
+        event: str,
+        arg: Any,
+    ) -> TraceFunction | None:
+        try:
+            if event != TraceEvent.CALL.value:
+                return None
+            return self._handle_call(frame)
+        except BaseException as exc:
+            print(f"global_trace error: {exc}", file=sys.stderr)
+            return None
+
+    def local_trace_combined(
+        self,
+        frame: types.FrameType,
+        event: str,
+        arg: Any,
+    ) -> TraceFunction | None:
+        """Dispatch function RETURN/BOTH and file_line local trace on one frame (§5.3 step 5)."""
+        try:
+            if event == TraceEvent.LINE.value:
+                self._capture_file_line_hits(frame, TraceEvent.LINE)
+                return self.local_trace_combined
+
+            if event == TraceEvent.RETURN.value:
+                bp_ids = self._frame_return_bps.pop(id(frame), [])
+                for bp_id in bp_ids:
+                    self._enqueue(
+                        frame,
+                        bp_id,
+                        TraceEvent.RETURN,
+                        return_value=arg,
+                    )
+                self._capture_file_line_hits(
+                    frame,
+                    TraceEvent.RETURN,
+                    return_value=arg,
+                )
+                return None
+
+            return self.local_trace_combined
+        except BaseException as exc:
+            print(f"combined local_trace error: {exc}", file=sys.stderr)
+            return None
+
+    def local_trace_for_function_breakpoint(
+        self,
+        frame: types.FrameType,
+        event: str,
+        arg: Any,
+    ) -> TraceFunction | None:
+        """Scoped trace for RETURN/BOTH — capture on ``'return'`` only (§5.3)."""
+        try:
+            if event != TraceEvent.RETURN.value:
+                return self.local_trace_for_function_breakpoint
+            bp_ids = self._frame_return_bps.pop(id(frame), [])
+            for bp_id in bp_ids:
+                self._enqueue(
+                    frame,
+                    bp_id,
+                    TraceEvent.RETURN,
+                    return_value=arg,
+                )
+            return None
+        except BaseException as exc:
+            print(f"local_trace error: {exc}", file=sys.stderr)
+            return None
+
+    def local_trace_for_file_line_breakpoint(
+        self,
+        frame: types.FrameType,
+        event: str,
+        arg: Any,
+    ) -> TraceFunction | None:
+        """Scoped line trace in watched files only (§5.3)."""
+        try:
+            if event == TraceEvent.LINE.value:
+                self._capture_file_line_hits(frame, TraceEvent.LINE)
+                return self.local_trace_for_file_line_breakpoint
+
+            if event == TraceEvent.RETURN.value:
+                self._capture_file_line_hits(
+                    frame,
+                    TraceEvent.RETURN,
+                    return_value=arg,
+                )
+                return None
+
+            return self.local_trace_for_file_line_breakpoint
+        except BaseException as exc:
+            print(f"file_line local_trace error: {exc}", file=sys.stderr)
+            return None
+
+    def _capture_file_line_hits(
+        self,
+        frame: types.FrameType,
+        event: TraceEvent,
+        *,
+        return_value: Any | None = None,
+    ) -> None:
+        bp_ids = self._registry.get_line_breakpoint_ids(
+            frame.f_code.co_filename,
+            frame.f_lineno,
+        )
+        for bp_id in bp_ids:
+            bp = self._registry.get(bp_id)
+            if bp is None:
+                continue
+            if event == TraceEvent.LINE and bp.capture_mode in (
+                CaptureMode.ENTRY,
+                CaptureMode.BOTH,
+            ):
+                self._enqueue(frame, bp_id, TraceEvent.LINE)
+            elif event == TraceEvent.RETURN and bp.capture_mode in (
+                CaptureMode.RETURN,
+                CaptureMode.BOTH,
+            ):
+                self._enqueue(
+                    frame,
+                    bp_id,
+                    TraceEvent.RETURN,
+                    return_value=return_value,
+                )
+
+    def _handle_call(self, frame: types.FrameType) -> TraceFunction | None:
+        code = frame.f_code
+        path = normalize_path(code.co_filename)
+
+        if (
+            not self._registry.has_any_function_or_method_bp()
+            and path not in self._registry.watched_files()
+        ):
+            return None
+
+        bp_ids = self._registry.get_matching_breakpoint_ids(
+            co_name=code.co_name,
+            co_qualname=code.co_qualname,
+            co_filename=code.co_filename,
+            lineno=frame.f_lineno,
+            event=TraceEvent.CALL,
+        )
+
+        local_trace_needed = False
+        for bp_id in bp_ids:
+            bp = self._registry.get(bp_id)
+            if bp is None:
+                continue
+            if bp.capture_mode in (CaptureMode.ENTRY, CaptureMode.BOTH):
+                self._enqueue(frame, bp_id, TraceEvent.CALL)
+            if bp.capture_mode in (CaptureMode.RETURN, CaptureMode.BOTH):
+                local_trace_needed = True
+
+        if local_trace_needed:
+            return_bps = self._return_breakpoint_ids(bp_ids)
+            if return_bps:
+                self._frame_return_bps[id(frame)] = return_bps
+            if path in self._registry.watched_files():
+                return self.local_trace_combined
+            return self.local_trace_for_function_breakpoint
+
+        if path in self._registry.watched_files():
+            return self.local_trace_for_file_line_breakpoint
+
+        return None
+
+    def _return_breakpoint_ids(self, bp_ids: list[str]) -> list[str]:
+        matched: list[str] = []
+        for bp_id in bp_ids:
+            bp = self._registry.get(bp_id)
+            if bp is None:
+                continue
+            if bp.capture_mode in (CaptureMode.RETURN, CaptureMode.BOTH):
+                matched.append(bp_id)
+        return matched
+
+    def _enqueue(
+        self,
+        frame: types.FrameType,
+        breakpoint_id: str,
+        event: TraceEvent,
+        *,
+        return_value: Any | None = None,
+    ) -> None:
+        raw = capture_raw(
+            frame,
+            breakpoint_id=breakpoint_id,
+            event=event,
+            return_value=return_value,
+        )
+        enqueue_capture(
+            self._capture_queue,
+            raw,
+            drop_logger=self._drop_logger,
+        )

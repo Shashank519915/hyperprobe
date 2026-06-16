@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+from agent.installer import disable_tracing_on_current_thread
 from agent.models import (
     Breakpoint,
     CaptureMode,
@@ -217,8 +218,7 @@ class SnapshotWorker:
         return path
 
     def _run(self) -> None:
-        sys.settrace(None)
-        threading.settrace(None)
+        disable_tracing_on_current_thread()
         while not self._stop.is_set():
             try:
                 raw = self._queue.get(timeout=0.1)
