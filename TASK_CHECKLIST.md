@@ -24,7 +24,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ merged |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 2/2 | ✅ merged |
 | PR-11 | `feat/docker` | 11.1–11.3 | 3/3 | ✅ merged |
-| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 1/6 | 🔄 in progress |
+| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 2/6 | 🔄 in progress |
 | PR-13 | `chore/ci-hardening` | 12.2–12.3 | 0/2 | ⬜ todo |
 | PR-14 | `docs/readme` | 14.1 | 0/1 | ⬜ todo |
 
@@ -2188,7 +2188,7 @@ docker compose down
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `4b64326`, CI green) |
 | **Branch** | `test/integration-compliance` |
 | **Requirements** | R16 |
 | **Files** | `tests/test_capture_lifetime.py` |
@@ -2219,6 +2219,56 @@ pytest tests/ -q → 126 passed
 
 **Placeholder commit:** `test: capture RETURN and BOTH modes`
 
+**Actual commit hash:** `4b64326`
+
+**Actual commit message:**
+
+```text
+test: capture RETURN and BOTH modes
+- Extend tests/test_capture_lifetime.py — RETURN no-CALL, BOTH locals diff, method RETURN
+- Add worker JSON tests for return_value; module-level class for exact qualname (R16)
+- pytest 126 passed; update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 11.5 — Tracer tier isolation
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `test/integration-compliance` |
+| **Requirements** | R17 |
+| **Files** | `tests/test_tracer_tiers.py` |
+| **Done when** | No global line/return events; local trace only in watched files |
+
+**Delivered:**
+
+- Extended `tests/test_tracer_tiers.py` — 5 → **10** tests
+- Global trace ignores `'return'` (not only `'line'`) — tier-1 fast reject (R17)
+- Function RETURN/ENTRY in unwatched files: local trace never emits `'line'` events
+- file_line BOTH → LINE + RETURN on matching line; wrong line (999) → no capture
+- Combined overlap cases remain in `test_tracer_combined.py` (task 8.5)
+
+**Design notes** *(for README / review):*
+
+| Choice | Why |
+|--------|-----|
+| **Two-tier model (R17)** | `global_trace` handles `'call'` only; `'line'`/`'return'` handled by scoped local trace installed at call time |
+| **Wrong-line test (999)** | Proves line map is exact — watched file alone is not enough |
+| **Multi-line helper in test file** | Unwatched file → function BPs never install file-line local trace |
+
+**Verification:**
+
+```text
+pytest tests/test_tracer_tiers.py -q → 10 passed
+pytest tests/ -q → 131 passed
+```
+
+**Placeholder commit:** `test: tracer tier isolation (no global line events)`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -2230,7 +2280,7 @@ pytest tests/ -q → 126 passed
 | Task | Status | Files | Req |
 |------|--------|-------|-----|
 | **11.4** RETURN/BOTH tests | ✅ | `tests/test_capture_lifetime.py` | R16 |
-| **11.5** tracer tiers | ⬜ | `tests/test_tracer_tiers.py` | R17 |
+| **11.5** tracer tiers | ✅ | `tests/test_tracer_tiers.py` | R17 |
 | **11.6** multiple BPs | ⬜ | `tests/test_multiple_matching_breakpoints.py` | R20 |
 | **11.7** queue overflow | ⬜ | tests | R23 |
 | **11.8** file_line BP | ⬜ | `tests/test_file_line_bp.py` | R7, R22 |

@@ -84,6 +84,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 11.5 complete (local)
+
+- Extended `tests/test_tracer_tiers.py` — 10 tests (global ignores return, no spurious LINE, BOTH, wrong line)
+- **Insight:** tier-1 = call only; line/return always via local trace in watched files or RETURN/BOTH frames
+- pytest 131 passed; next: commit 11.5, then task 11.6
+
+### 2026-06-16 — Task 11.4 committed + pushed
+
+- Commit `4b64326` on `test/integration-compliance`; CI green
+
 ### 2026-06-16 — Task 11.4 complete (local)
 
 - Extended `tests/test_capture_lifetime.py` — 10 tests (RETURN/BOTH locals, method RETURN, worker JSON)

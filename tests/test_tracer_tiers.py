@@ -49,6 +49,121 @@ def test_global_trace_does_no_work_on_line_events():
     assert capture_queue.empty()
 
 
+def test_global_trace_does_no_work_on_return_events():
+    registry = BreakpointRegistry()
+    registry.register(
+        Breakpoint(
+            id="bp-return-fn",
+            type=BreakpointType.FUNCTION,
+            value="tracked",
+            capture_mode=CaptureMode.RETURN,
+        )
+    )
+    capture_queue = create_capture_queue()
+    tracer = Tracer(registry, capture_queue)
+    frame = sys._getframe()
+
+    assert tracer.global_trace(frame, "return", 42) is None
+    assert capture_queue.empty()
+
+
+def test_function_return_local_trace_does_not_emit_line_events():
+    registry = BreakpointRegistry()
+    registry.register(
+        Breakpoint(
+            id="bp-return-fn",
+            type=BreakpointType.FUNCTION,
+            value="multi_line_fn",
+            capture_mode=CaptureMode.RETURN,
+        )
+    )
+    capture_queue = create_capture_queue(maxsize=10)
+    tracer = Tracer(registry, capture_queue)
+
+    def multi_line_fn() -> int:
+        total = 0
+        total += 1
+        total += 2
+        return total
+
+    _run_with_tracer(tracer, multi_line_fn)
+    captured = _drain_queue(capture_queue)
+
+    assert len(captured) == 1
+    assert captured[0].event == TraceEvent.RETURN
+    assert all(item.event != TraceEvent.LINE for item in captured)
+
+
+def test_function_entry_does_not_install_line_tracing_without_watched_file():
+    registry = BreakpointRegistry()
+    registry.register(
+        Breakpoint(
+            id="bp-entry-fn",
+            type=BreakpointType.FUNCTION,
+            value="multi_line_fn",
+            capture_mode=CaptureMode.ENTRY,
+        )
+    )
+    capture_queue = create_capture_queue(maxsize=10)
+    tracer = Tracer(registry, capture_queue)
+
+    def multi_line_fn() -> int:
+        total = 0
+        total += 1
+        return total
+
+    _run_with_tracer(tracer, multi_line_fn)
+    captured = _drain_queue(capture_queue)
+
+    assert len(captured) == 1
+    assert captured[0].event == TraceEvent.CALL
+    assert all(item.event != TraceEvent.LINE for item in captured)
+
+
+def test_file_line_both_captures_line_and_return():
+    registry = BreakpointRegistry()
+    registry.register(
+        Breakpoint(
+            id="bp-line-both",
+            type=BreakpointType.FILE_LINE,
+            file=str(ADDITION_ENGINE_FILE),
+            line=5,
+            capture_mode=CaptureMode.BOTH,
+        )
+    )
+    capture_queue = create_capture_queue(maxsize=10)
+    tracer = Tracer(registry, capture_queue)
+
+    _run_with_tracer(tracer, lambda: AdditionEngine().add(6.0, 7.0))
+    captured = _drain_queue(capture_queue)
+
+    events = {(item.breakpoint_id, item.event) for item in captured}
+    assert ("bp-line-both", TraceEvent.LINE) in events
+    assert ("bp-line-both", TraceEvent.RETURN) in events
+    return_capture = next(
+        item for item in captured if item.event == TraceEvent.RETURN
+    )
+    assert return_capture.return_value == 13.0
+
+
+def test_file_line_breakpoint_does_not_fire_on_wrong_line():
+    registry = BreakpointRegistry()
+    registry.register(
+        Breakpoint(
+            id="bp-wrong-line",
+            type=BreakpointType.FILE_LINE,
+            file=str(ADDITION_ENGINE_FILE),
+            line=999,
+            capture_mode=CaptureMode.BOTH,
+        )
+    )
+    capture_queue = create_capture_queue(maxsize=10)
+    tracer = Tracer(registry, capture_queue)
+
+    _run_with_tracer(tracer, lambda: AdditionEngine().add(1.0, 2.0))
+    assert capture_queue.empty()
+
+
 def test_file_line_local_trace_captures_entry_on_matching_line():
     registry = BreakpointRegistry()
     registry.register(
