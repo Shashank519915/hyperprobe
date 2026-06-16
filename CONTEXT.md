@@ -12,7 +12,7 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 | **GitHub** | https://github.com/Shashank519915/hyperprobe.git |
 | **Structure** | Monorepo — `target/` + `agent/` in one repo |
 | **Default branch** | `main` |
-| **Active branch** | `test/integration-compliance` (PR-12) |
+| **Active branch** | `chore/ci-hardening` (PR-13) |
 | **CI workflows** | `ci` (pytest + purity) · `Dependency Graph` (Dependabot — automatic) |
 
 ---
@@ -84,11 +84,22 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
-### 2026-06-16 — Task 12.1 complete (local)
+### 2026-06-16 — PR-12 merged
+
+- PR #12 merged to `main` (merge `6e9b773`); CI green
+- Tasks 11.4–12.1 + `COMPLIANCE_CHECKLIST.md` on main; branch `chore/ci-hardening` for PR-13
+
+### 2026-06-16 — Task 12.2 complete (local)
+
+- Finalized purity: `scripts/target_purity_check.py` + bash wrapper; 11 meta-tests
+- **Choice:** Python scanner + bash wrapper — testable on Windows, same CI command
+- pytest 159 passed; next: commit 12.2, then task 12.3
+
+### 2026-06-16 — Task 12.1 committed + merged
 
 - New `COMPLIANCE_CHECKLIST.md` — R1–R34 matrix with test/CI/manual evidence per row
 - **Choice:** honest ⚠️/⬜ markers for R13 concurrent, R32 CI docker, R33 README — not greenwashing gaps
-- PR-12 scope complete (11.4–11.8 + 12.1); next: commit 12.1, open combined PR-12
+- Commit `facc639`; merged via PR #12 (`6e9b773`)
 
 ### 2026-06-16 — Task 11.8 committed + pushed
 
@@ -541,7 +552,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-11 merged (`6e63868`). **PR-12** on `test/integration-compliance` — tasks 11.4–11.8 + 12.1 (single combined PR). Optional `_integration_` stretch deferred. PR draft in `TASK_CHECKLIST.md` § PR-12.
+PR-12 merged (`6e9b773`). **PR-13** on `chore/ci-hardening` — tasks 12.2–12.3.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 

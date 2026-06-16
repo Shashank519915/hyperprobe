@@ -3,7 +3,7 @@
 Maps assignment requirements **R1–R34** to automated tests, CI jobs, or manual verification steps.  
 Design reference: `notes/ARCHITECTURE_V2.md` · Implementation: `notes/IMPLEMENTATION_PLAN.md`
 
-**Last verified:** 2026-06-16 · **pytest:** 148 passed · **Branch:** `test/integration-compliance`
+**Last verified:** 2026-06-16 · **pytest:** 159 passed · **Branch:** `chore/ci-hardening` (PR-13)
 
 ---
 
@@ -34,7 +34,7 @@ pytest tests/test_capture_lifetime.py tests/test_tracer_tiers.py `
 |----|-------------|----------|--------|
 | **R1** | HTTP `GET /calculate?op=add&a=10&b=20` returns JSON result | `tests/test_target_http.py::test_calculate_add_returns_json`; `tests/test_bootstrap.py::test_bootstrap_calculate_produces_snapshot_with_stack_frames` | ✅ |
 | **R2** | ≥3 nested layers (handler → service → engine) visible in stack | `tests/test_bootstrap.py` — snapshot `stack_frames` includes `AdditionEngine.add`; `tests/test_capture.py::test_capture_includes_caller_locals` | ✅ |
-| **R3** | Target code: zero logging/tracing/agent imports | CI: `scripts/check_target_purity.sh`; `tests/test_target_http.py::test_target_tree_has_no_agent_imports` | ✅ |
+| **R3** | Target code: zero logging/tracing/agent imports | CI: `scripts/check_target_purity.sh` → `target_purity_check.py`; `tests/test_target_purity_script.py`; `tests/test_target_http.py::test_target_tree_has_no_agent_imports` | ✅ |
 | **R4** | Agent attaches externally (bootstrap + settrace, no target edits) | `agent/bootstrap.py`; `tests/test_bootstrap.py` | ✅ |
 | **R5** | Dynamic breakpoint: function name (`co_name`) | `tests/test_tracer_global.py`; `tests/test_control_api.py`; `tests/test_control_server.py::test_post_function_breakpoint_returns_201` | ✅ |
 | **R6** | Dynamic breakpoint: method (`co_qualname` exact) | `tests/test_tracer_global.py::test_global_trace_method_breakpoint_matches_qualname`; `tests/test_control_server.py::test_post_method_and_file_line_breakpoints` | ✅ |

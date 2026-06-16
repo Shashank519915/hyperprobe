@@ -24,8 +24,8 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ merged |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 2/2 | ✅ merged |
 | PR-11 | `feat/docker` | 11.1–11.3 | 3/3 | ✅ merged |
-| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 6/6 | ✅ complete (local) |
-| PR-13 | `chore/ci-hardening` | 12.2–12.3 | 0/2 | ⬜ todo |
+| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 6/6 | ✅ merged |
+| PR-13 | `chore/ci-hardening` | 12.2–12.3 | 1/2 | 🔄 in progress |
 | PR-14 | `docs/readme` | 14.1 | 0/1 | ⬜ todo |
 
 ---
@@ -2436,7 +2436,7 @@ test: file_line breakpoint at normalized path
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (local) |
+| **Status** | ✅ done (commit `facc639`, CI green, merged via PR #12) |
 | **Branch** | `test/integration-compliance` |
 | **Requirements** | R34 |
 | **Files** | `COMPLIANCE_CHECKLIST.md` |
@@ -2466,11 +2466,17 @@ pytest tests/ -q → 148 passed
 
 **Placeholder commit:** `docs: add COMPLIANCE_CHECKLIST.md mapping R1–R34`
 
-**Actual commit hash:**
+**Actual commit hash:** `facc639`
 
 **Actual commit message:**
 
-**Notes:** Completes PR-12 scope (11.4–11.8 + 12.1). Optional integration/concurrency tests remain out of scope unless added before PR open.
+```text
+docs: add COMPLIANCE_CHECKLIST.md mapping R1–R34
+- Add COMPLIANCE_CHECKLIST.md — test/CI/manual evidence per requirement (R34)
+- Add PR-12 draft description; update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; merged via PR #12 (`6e9b773`).
 
 ---
 
@@ -2488,11 +2494,11 @@ pytest tests/ -q → 148 passed
 
 **PR-12 merge checklist:**
 
-- [ ] All tasks 11.4–12.1 ✅ (commit 12.1 pending)
-- [ ] CI green on PR
-- [ ] Open single combined PR (`test/integration-compliance` → `main`)
+- [x] All tasks 11.4–12.1 ✅
+- [x] CI green on PR
+- [x] PR merged to `main` (PR #12, merge `6e9b773`)
 
-**Pull request draft** *(open after 12.1 commit + push):*
+**Pull request draft** *(merged — PR #12, `6e9b773`):*
 
 | Field | Value |
 |-------|--------|
@@ -2583,9 +2589,54 @@ Review `COMPLIANCE_CHECKLIST.md` for full R1–R34 mapping.
 
 ## PR-13 — `chore/ci-hardening`
 
+### Task 12.2 — Finalize target purity script
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (local) |
+| **Branch** | `chore/ci-hardening` |
+| **Requirements** | R3 |
+| **Files** | `scripts/check_target_purity.sh`, `scripts/target_purity_check.py`, `tests/test_target_purity_script.py` |
+| **Done when** | Purity script fails on violation with file:line; passes on real `target/`; meta-tests |
+
+**Delivered:**
+
+- `scripts/target_purity_check.py` — Python scanner (comment-aware, file:line violations)
+- `scripts/check_target_purity.sh` — thin bash wrapper (CI entrypoint unchanged)
+- Removed PR-01 stub pass — missing `target/` now fails
+- Expanded rules: `sys.monitoring`, pdb/cProfile, `breakpoint()` (plus existing agent/logging/trace/OTel)
+- `tests/test_target_purity_script.py` — **11** tests (pass, missing dir, each violation type, comment skip)
+
+**Design notes** *(for README / review):*
+
+| Choice | Why |
+|--------|-----|
+| **Python core + bash wrapper** | Rules testable on Windows dev; CI still runs `bash scripts/check_target_purity.sh` |
+| **Comment-line skip** | Stricter than raw grep — docstrings/comments mentioning forbidden tokens don't false-fail |
+| **Fail with file:line** | Task 12.2 “fails on violation” — actionable stderr for reviewers |
+
+**Verification:**
+
+```text
+python scripts/target_purity_check.py → OK
+pytest tests/test_target_purity_script.py -q → 11 passed
+pytest tests/ -q → 159 passed
+bash scripts/check_target_purity.sh → OK (Linux CI / Git Bash)
+```
+
+**Placeholder commit:** `chore(ci): finalize target purity script`
+
+**Actual commit hash:**
+
+**Actual commit message:**
+
+**Notes:**
+
+---
+
 | Task | Status | Files | Req |
 |------|--------|-------|-----|
-| **12.2** purity script final | ⬜ | `scripts/check_target_purity.sh` | R3 |
+| **12.2** purity script final | ✅ | `scripts/`, `tests/test_target_purity_script.py` | R3 |
 | **12.3** docker CI job | ⬜ | `.github/workflows/ci.yml` | R32 |
 
 ---
@@ -2608,4 +2659,4 @@ Review `COMPLIANCE_CHECKLIST.md` for full R1–R34 mapping.
 
 ---
 
-*Last updated: 2026-06-16 — task 12.1 complete (local); PR-12 scope done*
+*Last updated: 2026-06-16 — task 12.2 complete (local); PR-12 merged*
