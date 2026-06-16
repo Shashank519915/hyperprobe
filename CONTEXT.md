@@ -84,6 +84,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 12.1 complete (local)
+
+- New `COMPLIANCE_CHECKLIST.md` — R1–R34 matrix with test/CI/manual evidence per row
+- **Choice:** honest ⚠️/⬜ markers for R13 concurrent, R32 CI docker, R33 README — not greenwashing gaps
+- PR-12 scope complete (11.4–11.8 + 12.1); next: commit 12.1, open combined PR-12
+
+### 2026-06-16 — Task 11.8 committed + pushed
+
+- Commit `d294170` on `test/integration-compliance`; CI green
+
 ### 2026-06-16 — Task 11.8 complete (local)
 
 - New `tests/test_file_line_bp.py` — 6 tests (relative/absolute/messy paths, exact line 5, worker JSON)
@@ -531,7 +541,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-11 merged (`6e63868`). **PR-12** on `test/integration-compliance` — tasks 11.4–11.8 + 12.1.
+PR-11 merged (`6e63868`). **PR-12** on `test/integration-compliance` — tasks 11.4–11.8 + 12.1 (single combined PR). Optional `_integration_` stretch deferred. PR draft in `TASK_CHECKLIST.md` § PR-12.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
