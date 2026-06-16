@@ -84,7 +84,13 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
-### 2026-06-16 — PR-11 merged
+### 2026-06-16 — Task 11.4 complete (local)
+
+- Extended `tests/test_capture_lifetime.py` — 10 tests (RETURN/BOTH locals, method RETURN, worker JSON)
+- **Choice:** module-level class for method qualname — nested classes get `<locals>` in `co_qualname`
+- pytest 126 passed; next: commit 11.4, then task 11.5
+
+### 2026-06-16 — PR-11 docs sync committed
 
 - PR #11 merged to `main` (merge `6e63868`); CI green
 - Full compose demo verified: calculate + breakpoints + 3 snapshots/request in logs (`EMIT_STDOUT`)

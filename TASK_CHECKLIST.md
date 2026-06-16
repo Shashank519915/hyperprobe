@@ -24,7 +24,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ merged |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 2/2 | ✅ merged |
 | PR-11 | `feat/docker` | 11.1–11.3 | 3/3 | ✅ merged |
-| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 0/6 | 🔄 in progress |
+| PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 1/6 | 🔄 in progress |
 | PR-13 | `chore/ci-hardening` | 12.2–12.3 | 0/2 | ⬜ todo |
 | PR-14 | `docs/readme` | 14.1 | 0/1 | ⬜ todo |
 
@@ -2184,9 +2184,52 @@ docker compose down
 
 ## PR-12 — `test/integration-compliance`
 
+### Task 11.4 — RETURN/BOTH capture tests
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `test/integration-compliance` |
+| **Requirements** | R16 |
+| **Files** | `tests/test_capture_lifetime.py` |
+| **Done when** | RETURN/BOTH locals + return_value; no frame refs; worker JSON |
+
+**Delivered:**
+
+- Extended `tests/test_capture_lifetime.py` — 4 → **10** tests
+- RETURN: no CALL events; final locals + `return_value`; method RETURN via qualname
+- BOTH: call vs return locals differ; two snapshot JSON files on BOTH hit
+- Worker path: RETURN snapshot JSON includes `return_value` and final locals (R16 end-to-end)
+- Frame lifetime: queued captures are dict copies only (no live frame refs)
+
+**Design notes** *(for README / review):*
+
+| Choice | Why |
+|--------|-----|
+| **Method RETURN uses module-level class** | Nested class `co_qualname` includes `<locals>` — BP must match exact qualname (`_MethodReturnEngine.mul`) |
+| **BOTH locals test** | At CALL, body not run → `running` absent; at RETURN, final locals + `return_value` (§5.5 RETURN semantics) |
+| **Worker JSON tests in lifetime file** | Proves RETURN/BOTH survive serialize + write, not just queue RawCapture |
+
+**Verification:**
+
+```text
+pytest tests/test_capture_lifetime.py -q → 10 passed
+pytest tests/ -q → 126 passed
+```
+
+**Placeholder commit:** `test: capture RETURN and BOTH modes`
+
+**Actual commit hash:**
+
+**Actual commit message:**
+
+**Notes:**
+
+---
+
 | Task | Status | Files | Req |
 |------|--------|-------|-----|
-| **11.4** RETURN/BOTH tests | ⬜ | `tests/test_capture_lifetime.py` | R16 |
+| **11.4** RETURN/BOTH tests | ✅ | `tests/test_capture_lifetime.py` | R16 |
 | **11.5** tracer tiers | ⬜ | `tests/test_tracer_tiers.py` | R17 |
 | **11.6** multiple BPs | ⬜ | `tests/test_multiple_matching_breakpoints.py` | R20 |
 | **11.7** queue overflow | ⬜ | tests | R23 |
