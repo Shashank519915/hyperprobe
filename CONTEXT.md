@@ -78,6 +78,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 9.2 complete (local)
+
+- Implemented `GET`/`POST /breakpoints` with validation (§5.4); added `breakpoint_to_dict`
+- Extended `tests/test_control_server.py` — 12 tests; pytest 116 passed
+- Next: commit 9.2, then task 9.3 (dynamic registration integration test)
+
+### 2026-06-16 — Task 9.1 committed + pushed
+
+- Commit `94fe2e8` on `feat/agent-control-api`; CI green
+
 ### 2026-06-16 — Task 9.1 complete (local)
 
 - Expanded `agent/control_server.py` — ThreadingHTTPServer on :9090, registry wired
@@ -394,7 +404,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-08 merged to `main`. **PR-09** on `feat/agent-control-api` — task 9.1 done locally.
+PR-08 merged to `main`. **PR-09** on `feat/agent-control-api` — tasks 9.1 ✅, 9.2 done locally.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 

@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from typing import Any
 
+from agent.breakpoints import breakpoint_from_dict, breakpoint_to_dict
 from agent.installer import disable_tracing_on_current_thread
 from agent.registry import BreakpointRegistry
 
@@ -36,24 +39,54 @@ class _ControlHandler(BaseHTTPRequestHandler):
         return
 
     def do_GET(self) -> None:
-        if self._is_breakpoints_path():
-            self.send_response(501)
-            self.end_headers()
+        if not self._is_breakpoints_path():
+            self._send_json(404, {"error": "not found"})
             return
-        self.send_response(404)
-        self.end_headers()
+        try:
+            payload = [
+                breakpoint_to_dict(bp) for bp in self.server.registry.list_all()
+            ]
+            self._send_json(200, payload)
+        except Exception as exc:
+            self._send_json(500, {"error": str(exc)})
 
     def do_POST(self) -> None:
-        if self._is_breakpoints_path():
-            self.send_response(501)
-            self.end_headers()
+        if not self._is_breakpoints_path():
+            self._send_json(404, {"error": "not found"})
             return
-        self.send_response(404)
-        self.end_headers()
+        try:
+            raw = self._read_json_body()
+            bp = breakpoint_from_dict(raw)
+            self.server.registry.register(bp)
+            self._send_json(201, breakpoint_to_dict(bp))
+        except json.JSONDecodeError:
+            self._send_json(400, {"error": "malformed JSON"})
+        except (ValueError, KeyError, TypeError) as exc:
+            self._send_json(400, {"error": str(exc)})
+        except Exception as exc:
+            self._send_json(500, {"error": str(exc)})
 
     def _is_breakpoints_path(self) -> bool:
         path = self.path.split("?", 1)[0].rstrip("/") or "/"
         return path == BREAKPOINTS_PATH
+
+    def _read_json_body(self) -> dict[str, Any]:
+        length = int(self.headers.get("Content-Length", "0"))
+        body = self.rfile.read(length) if length else b""
+        if not body:
+            raise json.JSONDecodeError("empty body", "", 0)
+        payload = json.loads(body.decode("utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("body must be a JSON object")
+        return payload
+
+    def _send_json(self, status: int, payload: Any) -> None:
+        body = json.dumps(payload).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
 
 class AgentControlServer:

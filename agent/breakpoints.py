@@ -105,6 +105,22 @@ def breakpoint_from_dict(raw: dict[str, Any]) -> Breakpoint:
     raise ValueError(f"unsupported breakpoint type: {bp_type}")
 
 
+def breakpoint_to_dict(bp: Breakpoint) -> dict[str, Any]:
+    """Serialize a breakpoint for control API JSON responses."""
+    payload: dict[str, Any] = {
+        "id": bp.id,
+        "type": bp.type.value,
+        "capture_mode": bp.capture_mode.value,
+    }
+    if bp.value is not None:
+        payload["value"] = bp.value
+    if bp.file is not None:
+        payload["file"] = bp.file
+    if bp.line is not None:
+        payload["line"] = bp.line
+    return payload
+
+
 def load_breakpoints_yaml(
     path: str | Path,
     registry: BreakpointRegistry,

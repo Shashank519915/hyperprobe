@@ -21,7 +21,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 2/2 | ✅ merged |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 3/3 | ✅ merged |
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 6/6 | ✅ merged |
-| PR-09 | `feat/agent-control-api` | 9.1–9.3 | 1/3 | 🔄 in progress |
+| PR-09 | `feat/agent-control-api` | 9.1–9.3 | 2/3 | 🔄 in progress |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | ⬜ todo |
 | PR-11 | `feat/docker` | 11.1–11.3 | 0/3 | ⬜ todo |
 | PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 0/6 | ⬜ todo |
@@ -1654,7 +1654,7 @@ Core sys.settrace instrumentation — two-tier global/local trace, capture pipel
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `94fe2e8`, CI green) |
 | **Branch** | `feat/agent-control-api` |
 | **Requirements** | R25 (prep) |
 | **Files** | `agent/control_server.py`, `tests/test_control_server.py` |
@@ -1675,6 +1675,48 @@ pytest tests/ -q → 109 passed
 
 **Placeholder commit:** `feat(agent): add control HTTP server on :9090`
 
+**Actual commit hash:** `94fe2e8`
+
+**Actual commit message:**
+
+```text
+feat(agent): add control HTTP server on :9090
+- Expand AgentControlServer with ThreadingHTTPServer on 0.0.0.0:9090
+- Wire BreakpointRegistry into control handlers; /breakpoints stub (501 until 9.2)
+- Add tests/test_control_server.py with 5 cases (109 total pytest)
+- Update TASK_CHECKLIST (PR-08 merged), CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 9.2 — POST/GET /breakpoints + validation
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-control-api` |
+| **Requirements** | R25–R28 |
+| **Files** | `agent/control_server.py`, `agent/breakpoints.py`, `tests/test_control_server.py` |
+| **Done when** | POST 201/400, GET 200, validation table §5.4 |
+
+**Delivered:**
+
+- `GET /breakpoints` → `200` JSON list via `breakpoint_to_dict`
+- `POST /breakpoints` → register/upsert via `breakpoint_from_dict`; `201` with assigned id
+- Validation: missing fields, invalid type/capture_mode, malformed JSON → `400`
+- Default `capture_mode` → `ENTRY` (via existing loader)
+
+**Verification:**
+
+```text
+pytest tests/test_control_server.py -q → 12 passed
+pytest tests/ -q → 116 passed
+```
+
+**Placeholder commit:** `feat(agent): implement POST and GET /breakpoints`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -1686,7 +1728,7 @@ pytest tests/ -q → 109 passed
 | Task | Status | Files | Req |
 |------|--------|-------|-----|
 | **9.1** control server :9090 | ✅ | `agent/control_server.py` | R25 |
-| **9.2** POST/GET + validation | ⬜ | `agent/control_server.py` | R25–R28 |
+| **9.2** POST/GET + validation | ✅ | `agent/control_server.py` | R25–R28 |
 | **9.3** dynamic registration test | ⬜ | `tests/test_control_api.py` | R25 |
 
 ---
