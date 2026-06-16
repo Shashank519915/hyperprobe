@@ -67,6 +67,62 @@ class Tracer:
             print(f"local_trace error: {exc}", file=sys.stderr)
             return None
 
+    def local_trace_for_file_line_breakpoint(
+        self,
+        frame: types.FrameType,
+        event: str,
+        arg: Any,
+    ) -> TraceFunction | None:
+        """Scoped line trace in watched files only (§5.3)."""
+        try:
+            if event == TraceEvent.LINE.value:
+                self._capture_file_line_hits(frame, TraceEvent.LINE)
+                return self.local_trace_for_file_line_breakpoint
+
+            if event == TraceEvent.RETURN.value:
+                self._capture_file_line_hits(
+                    frame,
+                    TraceEvent.RETURN,
+                    return_value=arg,
+                )
+                return None
+
+            return self.local_trace_for_file_line_breakpoint
+        except BaseException as exc:
+            print(f"file_line local_trace error: {exc}", file=sys.stderr)
+            return None
+
+    def _capture_file_line_hits(
+        self,
+        frame: types.FrameType,
+        event: TraceEvent,
+        *,
+        return_value: Any | None = None,
+    ) -> None:
+        bp_ids = self._registry.get_line_breakpoint_ids(
+            frame.f_code.co_filename,
+            frame.f_lineno,
+        )
+        for bp_id in bp_ids:
+            bp = self._registry.get(bp_id)
+            if bp is None:
+                continue
+            if event == TraceEvent.LINE and bp.capture_mode in (
+                CaptureMode.ENTRY,
+                CaptureMode.BOTH,
+            ):
+                self._enqueue(frame, bp_id, TraceEvent.LINE)
+            elif event == TraceEvent.RETURN and bp.capture_mode in (
+                CaptureMode.RETURN,
+                CaptureMode.BOTH,
+            ):
+                self._enqueue(
+                    frame,
+                    bp_id,
+                    TraceEvent.RETURN,
+                    return_value=return_value,
+                )
+
     def _handle_call(self, frame: types.FrameType) -> TraceFunction | None:
         code = frame.f_code
         path = normalize_path(code.co_filename)
@@ -101,7 +157,9 @@ class Tracer:
                 self._frame_return_bps[id(frame)] = return_bps
             return self.local_trace_for_function_breakpoint
 
-        # file_line local trace — task 8.4
+        if path in self._registry.watched_files():
+            return self.local_trace_for_file_line_breakpoint
+
         return None
 
     def _return_breakpoint_ids(self, bp_ids: list[str]) -> list[str]:

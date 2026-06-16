@@ -77,6 +77,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 8.4 complete (local)
+
+- Added `local_trace_for_file_line_breakpoint` + `_capture_file_line_hits` (§5.3)
+- Added `tests/test_tracer_tiers.py` — 5 tests; pytest 97 passed
+- Next: commit 8.4, then task 8.5 (combined local trace)
+
+### 2026-06-16 — Task 8.3 committed + pushed
+
+- Commit `0e05fc3` on `feat/agent-tracer`; CI green
+
 ### 2026-06-16 — Task 8.3 complete (local)
 
 - Implemented RETURN/BOTH capture in `local_trace_for_function_breakpoint` (§5.3)
@@ -352,7 +362,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-07 merged to `main`. **PR-08** on `feat/agent-tracer` — tasks 8.1–8.3 done locally (8.3 commit pending).
+PR-07 merged to `main`. **PR-08** on `feat/agent-tracer` — tasks 8.1–8.4 done locally (8.4 commit pending).
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 

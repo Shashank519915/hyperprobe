@@ -20,7 +20,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 5/5 | ✅ merged |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 2/2 | ✅ merged |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 3/3 | ✅ merged |
-| PR-08 | `feat/agent-tracer` | 8.1–8.6 | 3/6 | 🔄 in progress |
+| PR-08 | `feat/agent-tracer` | 8.1–8.6 | 4/6 | 🔄 in progress |
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 0/3 | ⬜ todo |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | ⬜ todo |
 | PR-11 | `feat/docker` | 11.1–11.3 | 0/3 | ⬜ todo |
@@ -1430,7 +1430,7 @@ feat(agent): add global_trace with fast reject and ENTRY capture
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `0e05fc3`, CI green) |
 | **Branch** | `feat/agent-tracer` |
 | **Requirements** | R16, R19 |
 | **Files** | `agent/tracer.py`, `tests/test_capture_lifetime.py`, `tests/test_tracer_global.py` |
@@ -1452,6 +1452,48 @@ pytest tests/ -q → 92 passed
 
 **Placeholder commit:** `feat(agent): add local_trace_for_function_breakpoint RETURN capture`
 
+**Actual commit hash:** `0e05fc3`
+
+**Actual commit message:**
+
+```text
+feat(agent): add local_trace_for_function_breakpoint RETURN capture
+- Capture RETURN/BOTH on return event with return_value and final locals
+- One RawCapture per matching breakpoint_id (§5.3.1)
+- Add tests/test_capture_lifetime.py; update test_tracer_global BOTH/RETURN cases
+- pytest 92 passed; update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 8.4 — local_trace_for_file_line_breakpoint
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-tracer` |
+| **Requirements** | R7, R17, R22 |
+| **Files** | `agent/tracer.py`, `tests/test_tracer_tiers.py` |
+| **Done when** | Line events in watched files only; file_line ENTRY/RETURN capture |
+
+**Delivered:**
+
+- `local_trace_for_file_line_breakpoint` — installed on `'call'` into `watched_files`
+- ENTRY/BOTH → capture on `'line'`; RETURN/BOTH → capture on `'return'` at matching line
+- `_capture_file_line_hits` helper; global trace still ignores non-`'call'` events (R17)
+- `tests/test_tracer_tiers.py` — tier isolation + `AdditionEngine.add` file_line hits
+
+**Verification:**
+
+```text
+pytest tests/test_tracer_tiers.py -q → 5 passed
+pytest tests/ -q → 97 passed
+```
+
+**Placeholder commit:** `feat(agent): add local_trace_for_file_line_breakpoint`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -1465,7 +1507,7 @@ pytest tests/ -q → 92 passed
 | **8.1** installer | ✅ | `agent/installer.py` | R15 |
 | **8.2** global_trace | ✅ | `agent/tracer.py` | R4, R8, R13 |
 | **8.3** local_trace function | ✅ | `agent/tracer.py` | R16, R19 |
-| **8.4** local_trace file_line | ⬜ | `agent/tracer.py` | R7, R17 |
+| **8.4** local_trace file_line | ✅ | `agent/tracer.py` | R7, R17 |
 | **8.5** combined local trace | ⬜ | `agent/tracer.py` | R18 |
 | **8.6** agent thread isolation | ⬜ | worker, control_server | R24 |
 
