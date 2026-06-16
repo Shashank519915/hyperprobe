@@ -22,7 +22,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 3/3 | ✅ merged |
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 6/6 | ✅ merged |
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ merged |
-| PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | 🔄 in progress |
+| PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 2/2 | ✅ ready for PR |
 | PR-11 | `feat/docker` | 11.1–11.3 | 0/3 | ⬜ todo |
 | PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 0/6 | ⬜ todo |
 | PR-13 | `chore/ci-hardening` | 12.2–12.3 | 0/2 | ⬜ todo |
@@ -1826,7 +1826,7 @@ Agent control HTTP API on `:9090` — list and register breakpoints at runtime w
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `5c14401`, CI green) |
 | **Branch** | `feat/agent-bootstrap` |
 | **Requirements** | R4, R24, R29 |
 | **Files** | `agent/bootstrap.py`, `agent/installer.py`, `agent/control_server.py`, `tests/test_agent_thread_isolation.py` |
@@ -1855,6 +1855,53 @@ pytest tests/ -q → 118 passed
 
 **Placeholder commit:** `feat(agent): add bootstrap entrypoint`
 
+**Actual commit hash:** `5c14401`
+
+**Actual commit message:**
+
+```text
+feat(agent): add bootstrap entrypoint
+- Add agent/bootstrap.py — YAML, worker, control :9090, trace, target :8080
+- Fix disable_tracing: sys.settrace(None) only — preserve threading.settrace for calculator threads
+- Fix control server: disable tracing in process_request_thread (handler thread)
+- pytest 118 passed; update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 10.2 — Bootstrap smoke test
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-bootstrap` |
+| **Requirements** | R1, R11 |
+| **Files** | `tests/test_bootstrap.py` |
+| **Done when** | HTTP `/calculate` → snapshot JSON with `stack_frames` |
+
+**Delivered:**
+
+- `tests/test_bootstrap.py` — `start_agent` + target on ephemeral ports; GET `/calculate?op=add` → 200
+- Asserts snapshot file on disk for `seed-method-add` with `AdditionEngine.add` in `stack_frames`
+- Control API smoke: GET `/breakpoints` lists seed YAML breakpoints
+
+**Design notes** *(for README / review):*
+
+- Reuses `start_agent()` from 10.1 (not full `run()`) so tests can bind ephemeral ports and tear down cleanly
+- **Assert snapshot files + `capture_queue.join()`** — same pattern as 9.3; worker drains queue asynchronously
+- Seed `breakpoints.yaml` method BP (`AdditionEngine.add`) is the stable assertion target for add requests
+
+**Verification:**
+
+```text
+pytest tests/test_bootstrap.py -q → 2 passed
+pytest tests/ -q → 120 passed
+```
+
+**Placeholder commit:** `test(agent): end-to-end bootstrap smoke test`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -1866,7 +1913,43 @@ pytest tests/ -q → 118 passed
 | Task | Status | Files | Req |
 |------|--------|-------|-----|
 | **10.1** bootstrap entrypoint | ✅ | `agent/bootstrap.py` | R4, R24, R29 |
-| **10.2** smoke test | ⬜ | tests | R1, R11 |
+| **10.2** smoke test | ✅ | `tests/test_bootstrap.py` | R1, R11 |
+
+**PR-10 merge checklist:**
+
+- [x] All tasks 10.1–10.2 ✅
+- [ ] CI green on PR
+- [ ] PR merged to `main`
+
+**Pull request draft** *(open after task 10.2 commit + push):*
+
+| Field | Value |
+|-------|--------|
+| **When** | After 10.2 pushed |
+| **Base ← Compare** | `main` ← `feat/agent-bootstrap` |
+| **Title** | `feat(agent): bootstrap entrypoint + smoke test (PR-10)` |
+
+**Description** (paste into GitHub PR body):
+
+```markdown
+## Summary
+Single process entrypoint — `python -m agent.bootstrap` wires agent + calculator (R4, R24, R29, R1, R11).
+
+## Tasks included
+
+### Task 10.1 — Bootstrap entrypoint
+- **Files:** `agent/bootstrap.py`, `agent/installer.py`, `agent/control_server.py`
+- **Behavior:** YAML → registry, worker, control :9090, trace install, target :8080
+
+### Task 10.2 — Bootstrap smoke test
+- **Files:** `tests/test_bootstrap.py`
+- **Behavior:** HTTP calculate → snapshot JSON with stack_frames; control API lists seed BPs
+
+## Test plan
+- [x] `pytest tests/test_bootstrap.py tests/test_agent_thread_isolation.py -q` → 7 passed
+- [x] `pytest tests/ -q` → 120 passed
+- [ ] CI green
+```
 
 ---
 

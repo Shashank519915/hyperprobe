@@ -81,6 +81,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 10.2 complete (local)
+
+- Added `tests/test_bootstrap.py` — calculate → snapshot with `stack_frames`; control API seed BP list
+- **Choice:** `start_agent()` fixture (not `run()`) for ephemeral ports + clean teardown
+- pytest 120 passed; PR-10 ready for commit + PR
+
+### 2026-06-16 — Task 10.1 committed + pushed
+
+- Commit `5c14401` on `feat/agent-bootstrap`; CI green
+
 ### 2026-06-16 — Task 10.1 complete (local)
 
 - Added `agent/bootstrap.py` — YAML → registry, worker, control :9090, trace install, target :8080
@@ -430,7 +440,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-09 merged to `main` (PR #9, `cdb87a5`). **PR-10** on `feat/agent-bootstrap` — task 10.1 done locally.
+PR-09 merged to `main` (PR #9, `cdb87a5`). **PR-10** on `feat/agent-bootstrap` — tasks 10.1 ✅ (`5c14401`), 10.2 done locally (ready for commit + PR).
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
