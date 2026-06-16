@@ -40,7 +40,8 @@ hyperprobe/
 │   ├── capture.py      # sync RawCapture from live frames (PR-07)
 │   ├── worker.py       # SnapshotWorker + JSON write (PR-07)
 │   ├── installer.py    # sys.settrace + threading.settrace (PR-08)
-│   └── tracer.py       # global_trace + local trace tiers (PR-08)
+│   ├── tracer.py       # global_trace + local trace tiers (PR-08)
+│   └── control_server.py  # control server stub, tracing disabled (PR-08/09)
 ├── target/
 │   ├── handlers.py     # layer 1 — RouteHandler
 │   ├── server.py       # ThreadingHTTPServer :8080 (PR-03)
@@ -76,6 +77,16 @@ hyperprobe/
 ## Progress log
 
 Append newest entries at the **top**.
+
+### 2026-06-16 — Task 8.6 complete (local)
+
+- Added `disable_tracing_on_current_thread()`; wired in worker + `AgentControlServer` stub
+- Added `tests/test_agent_thread_isolation.py` — 4 tests; pytest 104 passed
+- PR-08 complete — open PR after commit + push
+
+### 2026-06-16 — Task 8.5 committed + pushed
+
+- Commit `00f8f73` on `feat/agent-tracer`; CI green
 
 ### 2026-06-16 — Task 8.5 complete (local)
 
@@ -372,7 +383,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-07 merged to `main`. **PR-08** on `feat/agent-tracer` — tasks 8.1–8.5 done locally (8.5 commit pending).
+PR-07 merged to `main`. **PR-08** on `feat/agent-tracer` — all tasks 8.1–8.6 done locally; open PR after 8.6 commit + push.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 

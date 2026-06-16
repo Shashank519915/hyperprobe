@@ -20,7 +20,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-05 | `feat/agent-breakpoint-registry` | 5.1–5.5 | 5/5 | ✅ merged |
 | PR-06 | `feat/agent-safe-serializer` | 7.1–7.2 | 2/2 | ✅ merged |
 | PR-07 | `feat/agent-capture-worker` | 6.1–6.3 | 3/3 | ✅ merged |
-| PR-08 | `feat/agent-tracer` | 8.1–8.6 | 5/6 | 🔄 in progress |
+| PR-08 | `feat/agent-tracer` | 8.1–8.6 | 6/6 | ✅ ready for PR |
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 0/3 | ⬜ todo |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 0/2 | ⬜ todo |
 | PR-11 | `feat/docker` | 11.1–11.3 | 0/3 | ⬜ todo |
@@ -1514,7 +1514,7 @@ feat(agent): add local_trace_for_file_line_breakpoint
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `00f8f73`, CI green) |
 | **Branch** | `feat/agent-tracer` |
 | **Requirements** | R18 |
 | **Files** | `agent/tracer.py`, `tests/test_tracer_combined.py` |
@@ -1535,6 +1535,48 @@ pytest tests/ -q → 100 passed
 
 **Placeholder commit:** `feat(agent): add combined local trace dispatcher`
 
+**Actual commit hash:** `00f8f73`
+
+**Actual commit message:**
+
+```text
+feat(agent): add combined local trace dispatcher
+- Add local_trace_combined when RETURN/BOTH and file_line overlap (§5.3 step 5, R18)
+- Dispatch line hits and dual return captures from one local trace callback
+- Add tests/test_tracer_combined.py with 3 AdditionEngine.add overlap cases
+- pytest 100 passed; update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 8.6 — Agent thread isolation
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending) |
+| **Branch** | `feat/agent-tracer` |
+| **Requirements** | R24 |
+| **Files** | `agent/installer.py`, `agent/worker.py`, `agent/control_server.py`, `tests/test_agent_thread_isolation.py` |
+| **Done when** | Agent threads disable tracing; no self-snapshots |
+
+**Delivered:**
+
+- `disable_tracing_on_current_thread()` in `agent/installer.py` (§5.11)
+- `SnapshotWorker` + `AgentControlServer` call it on thread start
+- Minimal control server stub (`501` on GET) — full API in PR-09
+- `tests/test_agent_thread_isolation.py` — worker + control server isolation
+
+**Verification:**
+
+```text
+pytest tests/test_agent_thread_isolation.py -q → 4 passed
+pytest tests/ -q → 104 passed
+```
+
+**Placeholder commit:** `feat(agent): disable tracing on agent-owned threads`
+
 **Actual commit hash:**
 
 **Actual commit message:**
@@ -1550,9 +1592,59 @@ pytest tests/ -q → 100 passed
 | **8.3** local_trace function | ✅ | `agent/tracer.py` | R16, R19 |
 | **8.4** local_trace file_line | ✅ | `agent/tracer.py` | R7, R17 |
 | **8.5** combined local trace | ✅ | `agent/tracer.py` | R18 |
-| **8.6** agent thread isolation | ⬜ | worker, control_server | R24 |
+| **8.6** agent thread isolation | ✅ | `agent/installer.py`, `worker`, `control_server` | R24 |
 
----
+**PR-08 merge checklist:**
+
+- [x] All tasks 8.1–8.6 ✅
+- [ ] CI green on PR
+- [ ] PR merged to `main`
+
+**Pull request draft** *(copy to GitHub after task 8.6 push):*
+
+| Field | Value |
+|-------|--------|
+| **When** | Now — after task 8.6 commit + push |
+| **Base ← Compare** | `main` ← `feat/agent-tracer` |
+| **Title** | `feat(agent): two-tier tracer (PR-08)` |
+
+**Description** (paste into GitHub PR body):
+
+```markdown
+## Summary
+Core sys.settrace instrumentation — two-tier global/local trace, capture pipeline integration, agent thread isolation (R4, R8, R13–R19, R24).
+
+## Tasks included
+
+### Task 8.1 — Trace installer
+- **Files:** `agent/installer.py`, `tests/test_installer.py`
+- **Behavior:** `sys.settrace` + `threading.settrace` install/remove
+
+### Task 8.2 — global_trace
+- **Files:** `agent/tracer.py`, `tests/test_tracer_global.py`
+- **Behavior:** Fast reject, ENTRY/BOTH capture on call
+
+### Task 8.3 — local_trace function
+- **Files:** `agent/tracer.py`, `tests/test_capture_lifetime.py`
+- **Behavior:** RETURN/BOTH capture on return
+
+### Task 8.4 — local_trace file_line
+- **Files:** `agent/tracer.py`, `tests/test_tracer_tiers.py`
+- **Behavior:** Line events in watched files only
+
+### Task 8.5 — Combined local trace
+- **Files:** `agent/tracer.py`, `tests/test_tracer_combined.py`
+- **Behavior:** Single dispatcher when function + file_line overlap
+
+### Task 8.6 — Agent thread isolation
+- **Files:** `agent/installer.py`, `agent/worker.py`, `agent/control_server.py`, `tests/test_agent_thread_isolation.py`
+- **Behavior:** `disable_tracing_on_current_thread()` on agent threads
+
+## Test plan
+- [ ] `pytest tests/test_installer.py tests/test_tracer_global.py tests/test_capture_lifetime.py tests/test_tracer_tiers.py tests/test_tracer_combined.py tests/test_agent_thread_isolation.py -q` → 30 passed
+- [ ] `pytest tests/ -q` → 104 passed
+- [ ] CI green
+```
 
 ## PR-09 — `feat/agent-control-api`
 

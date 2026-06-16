@@ -59,3 +59,9 @@ def install_trace(trace_fn: TraceFunction) -> TraceInstaller:
 def remove_trace(installer: TraceInstaller) -> None:
     """Remove tracing installed by ``install_trace``."""
     installer.remove()
+
+
+def disable_tracing_on_current_thread() -> None:
+    """Agent-owned threads must not inherit target tracing (§5.11, R24)."""
+    sys.settrace(None)
+    threading.settrace(None)
