@@ -3,7 +3,7 @@
 Maps assignment requirements **R1–R34** to automated tests, CI jobs, or manual verification steps.  
 Design reference: `notes/ARCHITECTURE_V2.md` · Implementation: `notes/IMPLEMENTATION_PLAN.md`
 
-**Last verified:** 2026-06-16 · **pytest:** 159 passed · **Branch:** `chore/ci-hardening` (PR-13)
+**Last verified:** 2026-06-16 · **pytest:** 163 passed · **Branch:** `test/concurrency`
 
 ---
 
@@ -18,6 +18,9 @@ bash scripts/check_target_purity.sh
 pytest tests/test_capture_lifetime.py tests/test_tracer_tiers.py `
   tests/test_multiple_matching_breakpoints.py tests/test_queue_overflow.py `
   tests/test_file_line_bp.py -q
+
+# Integration + concurrency (R1, R13, R25)
+pytest tests/test_integration.py tests/test_concurrency.py -q
 ```
 
 **Manual demos** (see `notes/DEMO_COMMANDS.md`):
@@ -32,7 +35,7 @@ pytest tests/test_capture_lifetime.py tests/test_tracer_tiers.py `
 
 | ID | Requirement | Evidence | Status |
 |----|-------------|----------|--------|
-| **R1** | HTTP `GET /calculate?op=add&a=10&b=20` returns JSON result | `tests/test_target_http.py::test_calculate_add_returns_json`; `tests/test_bootstrap.py::test_bootstrap_calculate_produces_snapshot_with_stack_frames` | ✅ |
+| **R1** | HTTP `GET /calculate?op=add&a=10&b=20` returns JSON result | `tests/test_target_http.py`; `tests/test_bootstrap.py`; `tests/test_integration.py` | ✅ |
 | **R2** | ≥3 nested layers (handler → service → engine) visible in stack | `tests/test_bootstrap.py` — snapshot `stack_frames` includes `AdditionEngine.add`; `tests/test_capture.py::test_capture_includes_caller_locals` | ✅ |
 | **R3** | Target code: zero logging/tracing/agent imports | CI: `scripts/check_target_purity.sh` → `target_purity_check.py`; `tests/test_target_purity_script.py`; `tests/test_target_http.py::test_target_tree_has_no_agent_imports` | ✅ |
 | **R4** | Agent attaches externally (bootstrap + settrace, no target edits) | `agent/bootstrap.py`; `tests/test_bootstrap.py` | ✅ |
@@ -44,7 +47,7 @@ pytest tests/test_capture_lifetime.py tests/test_tracer_tiers.py `
 | **R10** | Frame metadata (function, file, line, qualname) | `tests/test_worker.py::test_build_snapshot_includes_breakpoint_and_stack`; snapshot JSON schema in worker tests | ✅ |
 | **R11** | Structured JSON snapshot files | `tests/test_worker.py::test_worker_writes_json_file`; `tests/test_bootstrap.py` | ✅ |
 | **R12** | Optional stdout via `EMIT_STDOUT` | `tests/test_worker.py::test_worker_emit_stdout`; Docker compose sets `EMIT_STDOUT=1` | ✅ |
-| **R13** | Non-halting instrumentation (no debugger pause) | Tracer returns immediately (`agent/tracer.py`); bootstrap HTTP completes under trace. **Gap:** dedicated concurrent load test not yet shipped (`test_concurrency.py` optional) | ⚠️ partial |
+| **R13** | Non-halting instrumentation (no debugger pause) | `tests/test_concurrency.py`; tracer returns immediately; bootstrap HTTP under load | ✅ |
 | **R14** | No modification of target source for observability | `target/` has no agent imports; purity script; agent wired only via bootstrap | ✅ |
 | **R15** | Runtime API: `sys.settrace` + `threading.settrace` | `agent/installer.py`; `tests/test_installer.py` | ✅ |
 | **R16** | Capture modes: ENTRY / RETURN / BOTH | `tests/test_capture_lifetime.py` | ✅ |
@@ -56,7 +59,7 @@ pytest tests/test_capture_lifetime.py tests/test_tracer_tiers.py `
 | **R22** | Path normalization for file_line matching | `tests/test_breakpoints.py`; `tests/test_file_line_bp.py` | ✅ |
 | **R23** | Bounded queue, non-blocking enqueue, drop on full | `tests/test_worker.py` (unit); `tests/test_queue_overflow.py` (target safety) | ✅ |
 | **R24** | Agent threads disable tracing (`sys.settrace(None)`) | `tests/test_agent_thread_isolation.py`; `tests/test_worker.py::test_worker_disables_tracing_in_worker_thread` | ✅ |
-| **R25** | Runtime `POST /breakpoints` without restart | `tests/test_control_api.py::test_dynamic_registration_via_control_api_produces_snapshot` | ✅ |
+| **R25** | Runtime `POST /breakpoints` without restart | `tests/test_control_api.py`; `tests/test_integration.py::test_runtime_breakpoint_over_http_then_calculate_produces_snapshot` | ✅ |
 | **R26** | Runtime `GET /breakpoints` | `tests/test_control_server.py::test_get_breakpoints_lists_registered_items`; `tests/test_bootstrap.py::test_bootstrap_control_api_lists_seed_breakpoints` | ✅ |
 | **R27** | POST validation (400 on bad payload) | `tests/test_control_server.py::test_post_missing_required_fields_returns_400`; `test_post_invalid_type_or_capture_mode_returns_400`; `test_post_malformed_json_returns_400` | ✅ |
 | **R28** | Optional `id` in POST → server assigns uuid4 | `tests/test_breakpoints_yaml.py::test_breakpoint_from_dict_assigns_uuid_when_id_missing` (same `breakpoint_from_dict` as control API) | ✅ |
@@ -80,16 +83,16 @@ pytest tests/test_capture_lifetime.py tests/test_tracer_tiers.py `
 | `tests/test_multiple_matching_breakpoints.py` | R20 |
 | `tests/test_queue_overflow.py` | R23 |
 | `tests/test_file_line_bp.py` | R7, R22 |
+| `tests/test_integration.py` | R1, R25 |
+| `tests/test_concurrency.py` | R13 |
 
 ---
 
 ## Known gaps (follow-up)
 
-| Item | Requirement | Planned |
-|------|-------------|---------|
-| Concurrent HTTP load under trace | R13 | Optional `tests/test_concurrency.py` |
-| Docker build in CI on every merge | R32 | `.github/workflows/ci.yml` docker job (task 12.3) |
-| Candidate README | R33 | PR-14 task 14.1 |
+| Item | Requirement | Status |
+|------|-------------|--------|
+| Human-written README | R33 | PR-14 — candidate review before push |
 
 ---
 
@@ -99,5 +102,6 @@ GitHub Actions workflow `.github/workflows/ci.yml` on every PR/push:
 
 1. `pytest tests/ -q`
 2. `bash scripts/check_target_purity.sh`
+3. `docker compose build` (second CI job)
 
-Covers automated evidence for R1–R31 and R32 docker build (except R13 concurrent load).
+Covers automated evidence for R1–R32 (R33 README pending PR-14).
