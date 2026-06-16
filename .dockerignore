@@ -1,0 +1,32 @@
+# Virtualenv and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Git and IDE
+.git/
+.github/
+.idea/
+.vscode/
+
+# Local-only / not needed in image
+notes/
+oldnotes/
+snapshots/*.json
+.env
+.env.*
+
+# Tests and dev tooling — image runs bootstrap only
+tests/
+requirements-dev.txt
+scripts/
+
+# Tracking docs (not runtime)
+TASK_CHECKLIST.md
+CONTEXT.md
+CODE_STYLE.md
+README.md
