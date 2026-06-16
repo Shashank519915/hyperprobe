@@ -12,7 +12,7 @@ See also: [`CODE_STYLE.md`](CODE_STYLE.md) · local design docs in `notes/` (git
 | **GitHub** | https://github.com/Shashank519915/hyperprobe.git |
 | **Structure** | Monorepo — `target/` + `agent/` in one repo |
 | **Default branch** | `main` |
-| **Active branch** | `feat/agent-safe-serializer` (PR-06) |
+| **Active branch** | `feat/agent-capture-worker` (PR-07) |
 | **CI workflows** | `ci` (pytest + purity) · `Dependency Graph` (Dependabot — automatic) |
 
 ---
@@ -36,7 +36,9 @@ hyperprobe/
 │   ├── models.py       # Breakpoint + snapshot models (PR-04)
 │   ├── breakpoints.py  # normalize_path + matchers + YAML loader
 │   ├── registry.py     # BreakpointRegistry
-│   └── serializer.py   # SafeSerializer (PR-06)
+│   ├── serializer.py   # SafeSerializer (PR-06)
+│   ├── capture.py      # sync RawCapture from live frames (PR-07)
+│   └── worker.py       # SnapshotWorker + JSON write (PR-07)
 ├── target/
 │   ├── handlers.py     # layer 1 — RouteHandler
 │   ├── server.py       # ThreadingHTTPServer :8080 (PR-03)
@@ -73,12 +75,47 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 6.3 complete (local)
+
+- Added `create_capture_queue`, `enqueue_capture`, `DropLogger` to `agent/worker.py` (§5.8.1)
+- Extended `tests/test_worker.py` — 6 overflow tests (13 total); pytest 74 passed
+- PR-07 ready — open PR after commit + push
+
+### 2026-06-16 — Task 6.2 committed + pushed
+
+- Commit `7fb47c6` on `feat/agent-capture-worker`; CI green
+
+### 2026-06-16 — Task 6.2 complete (local)
+
+- Added `agent/worker.py` — `build_snapshot`, `SnapshotWorker`, JSON write to `snapshots/`
+- Added `tests/test_worker.py` — 7 tests; pytest 68 passed
+- Next: commit 6.2, then task 6.3 (bounded queue overflow)
+
+### 2026-06-16 — Task 6.1 committed + pushed
+
+- Commit `37e7b41` on `feat/agent-capture-worker`; CI green
+
+### 2026-06-16 — Task 6.1 complete (local)
+
+- Added `agent/capture.py` — `capture_stack_frames`, `capture_raw` (§5.5)
+- Added `tests/test_capture.py` — 8 tests; nested stack, return via settrace; pytest 61 passed
+- Next: commit 6.1, then task 6.2 (SnapshotWorker)
+
+### 2026-06-16 — PR-06 merged
+
+- PR #6 merged to `main` (merge `edfbce1`); CI green
+- `SafeSerializer` + 15 pathological tests on main; pytest 53 passed
+- Commits: `3517cac` (7.1), `b0390a2` (7.2)
+- Paused — resume with PR-07 (`feat/agent-capture-worker`, tasks 6.1–6.3)
+
+### 2026-06-16 — Task 7.2 committed + pushed
+
+- Commit `b0390a2` on `feat/agent-safe-serializer`; opened PR #6
+
 ### 2026-06-16 — Task 7.2 complete (local)
 
 - Hardened `agent/serializer.py` — per-item dict/list guards, bad-key fallback
 - Extended `tests/test_serializer.py` — 8 pathological cases (15 total); pytest 53 passed
-- Updated `TASK_CHECKLIST.md`, `CONTEXT.md`, `notes/DEMO_COMMANDS.md`
-- Next: commit 7.2, push, open PR-06
 
 ### 2026-06-16 — Task 7.1 committed + pushed
 
@@ -276,7 +313,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-05 merged to `main`. **PR-06** on `feat/agent-safe-serializer` — tasks 7.1–7.2 done locally; open PR after 7.2 commit + push.
+PR-06 merged to `main`. **PR-07** on `feat/agent-capture-worker` — tasks 6.1–6.3 done locally; open PR after 6.3 commit + push.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
