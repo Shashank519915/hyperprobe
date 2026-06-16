@@ -23,7 +23,7 @@ Plan reference: `notes/IMPLEMENTATION_PLAN.md` · Design: `notes/ARCHITECTURE_V2
 | PR-08 | `feat/agent-tracer` | 8.1–8.6 | 6/6 | ✅ merged |
 | PR-09 | `feat/agent-control-api` | 9.1–9.3 | 3/3 | ✅ merged |
 | PR-10 | `feat/agent-bootstrap` | 10.1–10.2 | 2/2 | ✅ merged |
-| PR-11 | `feat/docker` | 11.1–11.3 | 2/3 | 🔄 in progress |
+| PR-11 | `feat/docker` | 11.1–11.3 | 3/3 | ✅ ready for PR |
 | PR-12 | `test/integration-compliance` | 11.4–11.8, 12.1 | 0/6 | ⬜ todo |
 | PR-13 | `chore/ci-hardening` | 12.2–12.3 | 0/2 | ⬜ todo |
 | PR-14 | `docs/readme` | 14.1 | 0/1 | ⬜ todo |
@@ -2024,7 +2024,7 @@ feat(docker): add Dockerfile with python 3.12-slim
 
 | Field | Detail |
 |-------|--------|
-| **Status** | ✅ done (commit pending) |
+| **Status** | ✅ done (commit `95ddb81`, CI green) |
 | **Branch** | `feat/docker` |
 | **Requirements** | R32, R12 (`EMIT_STDOUT`) |
 | **Files** | `docker-compose.yml` |
@@ -2055,7 +2055,58 @@ docker compose up --build
 pytest tests/ -q → 120 passed
 ```
 
-**Placeholder commit:** `feat(docker): add docker-compose with snapshot volume`
+**Actual commit hash:** `95ddb81`
+
+**Actual commit message:**
+
+```text
+feat(docker): add docker-compose with snapshot volume
+- docker-compose.yml: ports 8080/9090, ./snapshots bind mount, EMIT_STDOUT=1
+- One-command demo via docker compose up --build (R32, R12)
+- Update TASK_CHECKLIST, CONTEXT, DEMO_COMMANDS (PR-11 combined PR)
+```
+
+**Notes:** Pushed; CI green.
+
+---
+
+### Task 11.3 — Demo verified + PR description
+
+| Field | Detail |
+|-------|--------|
+| **Status** | ✅ done (commit pending — docs only) |
+| **Branch** | `feat/docker` |
+| **Requirements** | R32 |
+| **Files** | `TASK_CHECKLIST.md`, `CONTEXT.md`, `notes/DEMO_COMMANDS.md` (local) |
+| **Done when** | Full curl demo verified; PR-11 draft ready |
+
+**Delivered:**
+
+- Verified locally (2026-06-16): `docker compose config` → valid YAML; `docker compose up --build` → image builds + container starts
+- Manual `docker run` smoke (11.1): calculate `200`, breakpoints JSON
+- Snapshot bind mount: `dir snapshots\` shows `*.json` on host after requests (R11)
+- `docker compose down` cleans container/network
+
+**Design notes / troubleshooting** *(for README):*
+
+| Observation | Insight |
+|-------------|---------|
+| **Exit code 137** | Container killed (SIGKILL). Often **ports 8080/9090 already in use** from a prior `docker run` or local bootstrap — stop other containers (`docker ps`) or free ports before `compose up` |
+| **Compose vs run** | Both use same image/ENTRYPOINT; compose adds volume + `EMIT_STDOUT` |
+| **Old snapshot files** | Bind mount accumulates JSON across runs — normal; `snapshots/*.json` is gitignored |
+
+**Verification checklist (reviewer / README):**
+
+```text
+docker compose config
+docker compose up --build          # keep terminal open
+curl calculate + breakpoints + POST  # see DEMO_COMMANDS §11.4
+dir snapshots\                       # new *.json after calculate
+docker compose down
+pytest tests/ -q → 120 passed
+```
+
+**Placeholder commit:** `docs(docker): verify demo sequence and PR-11 draft`
 
 **Actual commit hash:**
 
@@ -2069,7 +2120,59 @@ pytest tests/ -q → 120 passed
 |------|--------|-------|-----|
 | **11.1** Dockerfile | ✅ | `Dockerfile`, `.dockerignore` | R32 |
 | **11.2** docker-compose | ✅ | `docker-compose.yml` | R32 |
-| **11.3** demo verified | ⬜ | PR description | R32 |
+| **11.3** demo verified | ✅ | PR description | R32 |
+
+**PR-11 merge checklist:**
+
+- [x] All tasks 11.1–11.3 ✅
+- [ ] CI green on PR
+- [ ] PR merged to `main`
+
+**Pull request draft** *(open now — combined 11.1–11.3):*
+
+| Field | Value |
+|-------|--------|
+| **When** | After 11.3 docs commit (optional) or open PR now with existing 2 commits |
+| **Base ← Compare** | `main` ← `feat/docker` |
+| **Title** | `feat(docker): containerized demo with docker compose (PR-11)` |
+
+**Description** (paste into GitHub PR body):
+
+```markdown
+## Summary
+One-command Docker demo — bootstrap entrypoint, calculator :8080, control API :9090, snapshot volume (R32, R12, R11).
+
+## Tasks included
+
+### Task 11.1 — Dockerfile
+- **Files:** `Dockerfile`, `.dockerignore`
+- **Behavior:** `python:3.12-slim`, ENTRYPOINT `agent.bootstrap`, EXPOSE 8080+9090
+
+### Task 11.2 — docker-compose
+- **Files:** `docker-compose.yml`
+- **Behavior:** `./snapshots` bind mount, `EMIT_STDOUT=1`
+
+### Task 11.3 — Demo verified
+- Manual verification on Windows + Docker Desktop (2026-06-16)
+
+## Demo (reviewer)
+
+```powershell
+docker compose up --build
+# Terminal 2:
+curl.exe "http://localhost:8080/calculate?op=add&a=10&b=20"
+curl.exe http://localhost:9090/breakpoints
+dir snapshots\
+docker compose down
+```
+
+**Expected:** calculate JSON result 30.0; breakpoints list includes seed YAML; snapshot JSON files on host.
+
+## Test plan
+- [x] `docker build` / `docker compose config` — OK
+- [x] `pytest tests/ -q` → 120 passed
+- [ ] CI green
+```
 
 ---
 

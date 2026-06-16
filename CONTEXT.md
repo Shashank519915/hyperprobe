@@ -84,6 +84,16 @@ hyperprobe/
 
 Append newest entries at the **top**.
 
+### 2026-06-16 — Task 11.3 complete (local)
+
+- Demo verified: `docker compose config`, `compose up --build`, snapshot bind mount, `compose down`
+- **Note:** exit code 137 if ports busy — stop prior containers before compose
+- PR-11 draft in TASK_CHECKLIST; open single combined PR (11.1–11.3)
+
+### 2026-06-16 — Task 11.2 committed + pushed
+
+- Commit `95ddb81` on `feat/docker`; CI green
+
 ### 2026-06-16 — Task 11.2 complete (local)
 
 - Added `docker-compose.yml` — ports 8080/9090, `./snapshots` volume, `EMIT_STDOUT=1`
@@ -469,7 +479,7 @@ Append newest entries at the **top**.
 
 ## Git workflow
 
-PR-10 merged (`c836a99`). **PR-11** on `feat/docker` — 11.1 ✅ pushed (`c365aeb`), 11.2 done locally. **One combined PR** for 11.1–11.3.
+PR-10 merged (`c836a99`). **PR-11** on `feat/docker` — 11.1 ✅ (`c365aeb`), 11.2 ✅ (`95ddb81`), 11.3 verified — **open one combined PR**, then merge → PR-12.
 
 After each PR merges: `git checkout main` → `git pull origin main` → new feature branch.
 
