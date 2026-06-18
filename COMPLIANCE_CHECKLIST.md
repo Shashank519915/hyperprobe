@@ -3,7 +3,7 @@
 Maps assignment requirements **R1–R34** to automated tests, CI jobs, or manual verification steps.  
 Design reference: `notes/ARCHITECTURE_V2.md` · Implementation: `notes/IMPLEMENTATION_PLAN.md`
 
-**Last verified:** 2026-06-16 · **pytest:** 163 passed · **Branch:** `test/concurrency`
+**Last verified:** 2026-06-16 · **pytest:** 163 passed · **Branch:** `main`
 
 ---
 
@@ -67,7 +67,7 @@ pytest tests/test_integration.py tests/test_concurrency.py -q
 | **R30** | Safe serialization (depth, cycles, callables) | `tests/test_serializer.py` | ✅ |
 | **R31** | Error isolation in trace callback and worker | `agent/tracer.py` (BaseException handlers); `tests/test_worker.py::test_worker_continues_after_processing_error` | ✅ |
 | **R32** | Docker one-command startup | `Dockerfile`, `docker-compose.yml`; CI: `.github/workflows/ci.yml` `docker` job (`docker compose build`); manual demo: `notes/DEMO_COMMANDS.md` | ✅ |
-| **R33** | Human-written README | `README.md` — PR-14 task 14.1 (candidate-authored) | ⬜ pending |
+| **R33** | Human-written README | `README.md` — PR-15 task 14.1 (candidate-authored) | ⬜ pending |
 | **R34** | This compliance checklist in repo | `COMPLIANCE_CHECKLIST.md` (this file) | ✅ |
 
 **Legend:** ✅ automated or CI · ⚠️ partial / manual demo required · ⬜ not yet delivered
@@ -92,7 +92,7 @@ pytest tests/test_integration.py tests/test_concurrency.py -q
 
 | Item | Requirement | Status |
 |------|-------------|--------|
-| Human-written README | R33 | PR-14 — candidate review before push |
+| Human-written README | R33 | PR-15 — candidate review before push on `docs/readme` |
 
 ---
 
@@ -104,4 +104,4 @@ GitHub Actions workflow `.github/workflows/ci.yml` on every PR/push:
 2. `bash scripts/check_target_purity.sh`
 3. `docker compose build` (second CI job)
 
-Covers automated evidence for R1–R32 (R33 README pending PR-14).
+Covers automated evidence for R1–R32 (R33 README pending PR-15).
