@@ -49,7 +49,7 @@ curl "http://localhost:8080/calculate?op=pow&a=2&b=3"
 Every request goes through 3 application layers:
 
 do_GET (target/server.py) → handle_calculate (target/handlers.py) → MathService.compute (target/services/math_service.py) → engine e.g. AdditionEngine.add (target/engines/addition.py)
-An `add` request hits all three seed breakpoints. div,mul,sub / unsupported ops only hit the function breakpoint on compute as set in the breakpoint.yaml essentially.
+An `add` request hits all three seed breakpoints. div,mul,sub / unsupported ops only hit the function breakpoint on compute as set in the breakpoints.yaml essentially.
 
 ---
 
